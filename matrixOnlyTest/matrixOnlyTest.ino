@@ -2,42 +2,7 @@
 #include <gamma.h>
 #include <Adafruit_GFX.h>
 #include <gfxfont.h>
-#include <Pushbutton.h>
 #include <Adafruit_NeoPixel.h>
-
-
-//input definitions
-//instrumentbuttons
-Pushbutton instrumentSelect_0(31);
-Pushbutton instrumentSelect_1(33);
-Pushbutton instrumentSelect_2(35);
-Pushbutton instrumentSelect_3(37);
-Pushbutton instrumentSelect_4(39);
-Pushbutton instrumentSelect_5(41);
-Pushbutton instrumentSelect_6(43);
-Pushbutton instrumentSelect_7(45);
-Pushbutton instrumentSelectButtons[] = {
-  instrumentSelect_0,instrumentSelect_1,instrumentSelect_2,
-  instrumentSelect_3,instrumentSelect_4,instrumentSelect_5,
-  instrumentSelect_6,instrumentSelect_7
-};
-
-//hitButtons
-Pushbutton hitButton_0(31);
-Pushbutton hitButton_1(33);
-Pushbutton hitButton_2(35);
-Pushbutton hitButton_3(37);
-Pushbutton hitButton_4(39);
-Pushbutton hitButton_5(41);
-Pushbutton hitButton_6(43);
-Pushbutton hitButton_7(45);
-Pushbutton hitButtons[] = {
-  hitButton_0,hitButton_1,hitButton_2,
-  hitButton_3,hitButton_4,hitButton_5,
-  hitButton_6,hitButton_7
-};
-
-
 
 //neoPixel definitions
 #define neoOutput 10
@@ -100,31 +65,16 @@ void InitAnimation(){
     for(int i = 0 ; i < 64; i++){
       matrix.setPixelColor(i, random(1,255), random(1,255), random(1,255));
       matrix.show();
-      delay(50);
+      delay(100);
     }
   }
 }
 
 // program loop
 void loop() {
-  CheckForInputs();
   CheckForStep();
 }
 
-void CheckForInputs(){
-  for(int i = 0 ; i < sizeof(instrumentSelectButtons);i++){
-        if(instrumentSelectButtons[i].getSingleDebouncedPress()){
-              selectedInstrument = i;
-              UpdateLeds();
-          }
-    }
-    for(int i = 0 ; i < sizeof(hitButtons);i++){
-        if(hitButtons[i].getSingleDebouncedPress()){
-              sequence[selectedInstrument][i] = !sequence[selectedInstrument][i];
-              UpdateLeds();
-          }
-    }
-}
 
 void CheckForStep(){
   unsigned long currentMillis = millis();
