@@ -1,3 +1,4 @@
+#include <MIDI.h>
 #include <Adafruit_NeoMatrix.h>
 #include <gamma.h>
 #include <Adafruit_GFX.h>
@@ -23,14 +24,14 @@ Pushbutton instrumentSelectButtons[] = {
 };
 
 //hitButtons
-Pushbutton hitButton_0(31);
-Pushbutton hitButton_1(33);
-Pushbutton hitButton_2(35);
-Pushbutton hitButton_3(37);
-Pushbutton hitButton_4(39);
-Pushbutton hitButton_5(41);
-Pushbutton hitButton_6(43);
-Pushbutton hitButton_7(45);
+Pushbutton hitButton_0(30);
+Pushbutton hitButton_1(32);
+Pushbutton hitButton_2(34);
+Pushbutton hitButton_3(36);
+Pushbutton hitButton_4(38);
+Pushbutton hitButton_5(40);
+Pushbutton hitButton_6(42);
+Pushbutton hitButton_7(44);
 Pushbutton hitButtons[] = {
   hitButton_0,hitButton_1,hitButton_2,
   hitButton_3,hitButton_4,hitButton_5,
@@ -40,7 +41,8 @@ Pushbutton hitButtons[] = {
 
 
 //neoPixel definitions
-#define neoOutput 10
+#define neoOutput 3
+#define matrixBrightness 50
 Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(8, 8, neoOutput,
   NEO_MATRIX_BOTTOM     + NEO_MATRIX_LEFT +
   NEO_MATRIX_ROWS + NEO_MATRIX_PROGRESSIVE,
@@ -55,13 +57,23 @@ class NeoColor
 };
 NeoColor::NeoColor(int red,int green, int blue){
   r = red;
-    g = green;
-    b = blue;
+  g = green;
+  b = blue;
 }
-NeoColor normalStepColor = NeoColor(255,255,255);
+
+NeoColor baseUnselectedValue = NeoColor(0,0,0);
+
+NeoColor normalStepColor = NeoColor(255,200,200);
+
 NeoColor selectedColor = NeoColor(0,255,0);
-NeoColor selectedAndStepColor = NeoColor(0,0,255);
-NeoColor baseUnselectedValue = NeoColor(100,100,100);
+
+NeoColor selectedAndStepColor = NeoColor(0,255,100);
+
+NeoColor selectedInstrumentColor = NeoColor(0,0,255);
+
+//midi definitions
+MIDI_CREATE_DEFAULT_INSTANCE();
+int instrumentNotes[] = {36,38,39,42,46,43,45,48};
 
 //config values
 int numSteps = 8;
@@ -69,8 +81,8 @@ int bpm = 120;
 bool firstStep = true;
 
 //util vars
-int step = 0;
-int selectedInstrument = 0;
+int currentStep = 0;
+int selectedInstrument = 4;
 unsigned long lastStep = 0;
 
 bool sequence[8][8] = {{false,false,false,false,false,false,false,false},
@@ -85,24 +97,14 @@ bool sequence[8][8] = {{false,false,false,false,false,false,false,false},
 
 // initialisation
 void setup() {
+  MIDI.begin(MIDI_CHANNEL_OMNI);
   InitMatrix();
-  InitAnimation();
 }
 
 void InitMatrix(){
   matrix.begin();
-  matrix.setBrightness(255);
+  matrix.setBrightness(matrixBrightness);
   matrix.show();
-}
-
-void InitAnimation(){
-  for(int x = 0; x < 4; x++){
-    for(int i = 0 ; i < 64; i++){
-      matrix.setPixelColor(i, random(1,255), random(1,255), random(1,255));
-      matrix.show();
-      delay(50);
-    }
-  }
 }
 
 // program loop
@@ -131,9 +133,9 @@ void CheckForStep(){
   if(!firstStep){
     if (currentMillis - lastStep >= 60000/bpm) {
       lastStep = currentMillis;
-      step ++;
-      if(step == numSteps){
-        step = 0;
+      currentStep ++;
+      if(currentStep == numSteps){
+        currentStep = 0;
       }
       MakeStep();
     }
@@ -145,50 +147,43 @@ void CheckForStep(){
 }
 
 void MakeStep(){
+  PlayNotes();
   UpdateLeds();
 }
 
-void UpdateLeds(){
-  clearAllLeds();   
-  ShowCurrentStep();
-  setupSelectedLeds();
-  matrix.show();
-}
-
-void clearAllLeds(){
-  for(int i = 0; i < 64; i++){
-    matrix.setPixelColor(i, baseUnselectedValue.r, baseUnselectedValue.g, baseUnselectedValue.b);
-  }
-}
-
-void ShowCurrentStep(){
-  int masterIndex = 0;
-  for(int i = 0; i < 8; i++){
-    for(int x = 0; x < 8; x ++){
-      if(step == x){
-        if(sequence[i][x] == true){
-          matrix.setPixelColor(masterIndex, selectedAndStepColor.r, selectedAndStepColor.g, selectedAndStepColor.b);
-        }else{
-          matrix.setPixelColor(masterIndex, normalStepColor.r, normalStepColor.g, normalStepColor.b);
-        }
+void PlayNotes(){
+    for(int i = 0; i < 8; i++){
+      if(sequence[i][currentStep] == true){
+        MIDI.sendNoteOn(instrumentNotes[i], 100, 1);  
       }
-      masterIndex++;
     }
-  }
 }
 
-void setupSelectedLeds(){
+void UpdateLeds(){
   int masterIndex = 0;
   for(int i = 0; i < 8; i++){
     for(int x = 0; x < 8; x ++){
       if(sequence[i][x] == true){
-        if(selectedInstrument == i){
-          matrix.setPixelColor(masterIndex, baseUnselectedValue.r, baseUnselectedValue.g, baseUnselectedValue.b);
+        if(currentStep == x){
+          matrix.setPixelColor(masterIndex, selectedAndStepColor.r, selectedAndStepColor.g, selectedAndStepColor.b);
+        }else{
+          matrix.setPixelColor(masterIndex, selectedColor.r, selectedColor.g, selectedColor.b);
         }
-      }
+      }else{
+        if(currentStep == x){
+          matrix.setPixelColor(masterIndex, normalStepColor.r, normalStepColor.g, normalStepColor.b);
+        }else{
+          if(selectedInstrument == i){
+            matrix.setPixelColor(masterIndex, selectedInstrumentColor.r, selectedInstrumentColor.g, selectedInstrumentColor.b);
+          }else{
+            matrix.setPixelColor(masterIndex, baseUnselectedValue.r, baseUnselectedValue.g, baseUnselectedValue.b);
+          }
+        }
+      } 
       masterIndex++;
-    }
+    } 
   }
+  matrix.show();
 }
 
 

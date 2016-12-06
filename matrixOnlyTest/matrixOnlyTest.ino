@@ -6,7 +6,7 @@
 
 //neoPixel definitions
 #define neoOutput 3
-#define matrixBrightness 150
+#define matrixBrightness 50
 Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(8, 8, neoOutput,
   NEO_MATRIX_BOTTOM     + NEO_MATRIX_LEFT +
   NEO_MATRIX_ROWS + NEO_MATRIX_PROGRESSIVE,
