@@ -1,3 +1,4 @@
+#include <Potentiometer.h>
 #include <MIDI.h>
 #include <Adafruit_NeoMatrix.h>
 #include <gamma.h>
@@ -8,6 +9,10 @@
 
 
 //input definitions
+//pots
+Potentiometer brightnessPot = Potentiometer(2);
+int lastBrightnessLevel = 0;
+
 //instrumentbuttons
 Pushbutton instrumentSelect_0(31);
 Pushbutton instrumentSelect_1(33);
@@ -42,7 +47,6 @@ Pushbutton hitButtons[] = {
 
 //neoPixel definitions
 #define neoOutput 3
-#define matrixBrightness 50
 Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(8, 8, neoOutput,
   NEO_MATRIX_BOTTOM     + NEO_MATRIX_LEFT +
   NEO_MATRIX_ROWS + NEO_MATRIX_PROGRESSIVE,
@@ -79,6 +83,7 @@ int instrumentNotes[] = {36,38,39,42,46,43,45,48};
 int numSteps = 8;
 int bpm = 120;
 bool firstStep = true;
+int matrixBrightness = 50;
 
 //util vars
 int currentStep = 0;
@@ -102,6 +107,7 @@ void setup() {
 }
 
 void InitMatrix(){
+  brightnessPot.setSectors(255);
   matrix.begin();
   matrix.setBrightness(matrixBrightness);
   matrix.show();
@@ -111,9 +117,10 @@ void InitMatrix(){
 void loop() {
   CheckForInputs();
   CheckForStep();
+  CheckForBrightnessAdjustment();
 }
 
-void CheckForInputs(){
+void CheckForInputs(){  
   for(int i = 0 ; i < sizeof(instrumentSelectButtons);i++){
         if(instrumentSelectButtons[i].getSingleDebouncedPress()){
               selectedInstrument = i;
@@ -127,6 +134,15 @@ void CheckForInputs(){
           }
     }
 }
+
+void CheckForBrightnessAdjustment(){
+    int brightnessPotValue = brightnessPot.getSector();
+  if(brightnessPotValue != lastBrightnessLevel){
+      lastBrightnessLevel = brightnessPotValue;
+      matrix.setBrightness(brightnessPotValue);
+      matrix.show();
+    }
+  }
 
 void CheckForStep(){
   unsigned long currentMillis = millis();
