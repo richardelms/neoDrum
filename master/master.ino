@@ -68,7 +68,7 @@ NeoColor normalStepColor = NeoColor(255,200,200);
 
 NeoColor selectedColor = NeoColor(0,255,0);
 
-NeoColor selectedAndStepColor = NeoColor(0,255,100);
+NeoColor selectedAndStepColor = NeoColor(255,0,0);
 
 NeoColor selectedInstrumentColor = NeoColor(0,0,255);
 
@@ -78,7 +78,7 @@ int instrumentNotes[] = {43,42,41,40,39,38,37,36};
 
 //config values
 int numSteps = 8;
-int bpm = 150;
+int bpm = 200;
 bool firstStep = true;
 int matrixStartingBrightness = 10;
 int lastBrightnessLevel = 0;
@@ -91,7 +91,7 @@ bool sequence[8][8];
 
 // initialisation
 void setup() {
-  Serial.begin(9600);
+//  Serial.begin(9600);
   MIDI.begin(MIDI_CHANNEL_OMNI);
   InitMatrix();
 }
@@ -188,7 +188,7 @@ void CheckForBrightnessAdjustment(){
 void CheckForStep(){
   unsigned long currentMillis = millis();
   if(!firstStep){
-    if (currentMillis - lastStep >= 60000/bpm) {
+    if (currentMillis - lastStep >= 60000/(bpm * 2)) {
       lastStep = currentMillis;
       currentStep ++;
       if(currentStep == numSteps){
