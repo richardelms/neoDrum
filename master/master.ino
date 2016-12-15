@@ -89,7 +89,7 @@ int octive = 0;
 int numSteps = 8;
 int bpm = 120;
 bool firstStep = true;
-int matrixStartingBrightness = 10;
+int matrixStartingBrightness = 20;
 int lastBrightnessLevel = 0;
 
 //util vars
@@ -112,10 +112,10 @@ int pass = 0;
 void InitAnimation() {
   matrix.setTextWrap(false);
   matrix.setTextColor(colors[0]);
-  for (int i = 0; i < 114; i++) {
+  for (int i = 0; i < 80; i++) {
     matrix.fillScreen(0);
     matrix.setCursor(x, 0);
-    matrix.print(F("ginTronics CR-101"));
+    matrix.print(F("ginTronic"));
     --x;
     pass ++;
     if (pass == 6) {
