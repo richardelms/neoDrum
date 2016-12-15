@@ -6,7 +6,7 @@
 #include <gfxfont.h>
 #include <Pushbutton.h>
 #include <Adafruit_NeoPixel.h>
-
+#include <LiquidCrystal.h>
 
 //input definitions
 //controlls
@@ -15,6 +15,9 @@ Pushbutton startStopButton(22);
 Pushbutton functionButton(23);
 Pushbutton upButton(24);
 Pushbutton downButton(25);
+
+//LCD Screen
+LiquidCrystal lcd(13, 12, 11, 10, 9, 8);
 
 //instrumentbuttons
 Pushbutton instrumentSelect_0(30);
@@ -89,11 +92,10 @@ int octive = 0;
 int numSteps = 8;
 int bpm = 120;
 bool firstStep = true;
-int matrixStartingBrightness = 20;
-int lastBrightnessLevel = 0;
+int matrixBrightness = 20;
 
 //util vars
-int functionMode = 0; //0 = bpm/ 1 = octive/ 2 = channel
+int functionMode = 0; //0 = bpm/ 1 = octive/ 2 = brightness
 int currentStep = 0;
 int selectedInstrument = 7;
 unsigned long lastStep = 0;
@@ -101,6 +103,10 @@ bool sequence[8][8];
 bool started = false;
 // initialisation
 void setup() {
+  // set up the LCD's number of columns and rows:
+  lcd.begin(16, 2);
+  // Print a message to the LCD.
+  lcd.print("ginTronics 101");
   Serial.begin(9600);
   MIDI.begin(MIDI_CHANNEL_OMNI);
   InitMatrix();
@@ -115,7 +121,7 @@ void InitAnimation() {
   for (int i = 0; i < 80; i++) {
     matrix.fillScreen(0);
     matrix.setCursor(x, 0);
-    matrix.print(F("ginTronic"));
+    matrix.print(F("ginTronics"));
     --x;
     pass ++;
     if (pass == 6) {
@@ -125,12 +131,13 @@ void InitAnimation() {
     matrix.show();
     delay(60);
   }
+  UpdateLcd();
 }
 
 void InitMatrix() {
   //  brightnessPot.setSectors(255);
   matrix.begin();
-  matrix.setBrightness(matrixStartingBrightness);
+  matrix.setBrightness(matrixBrightness);
   matrix.show();
   InitAnimation();
   UpdateLeds();
@@ -155,6 +162,7 @@ void CheckForInputs() {
     if (functionMode == 3) {
       functionMode = 0;
     }
+    UpdateLcd();
   }
 
   if (upButton.getSingleDebouncedRelease()) {
@@ -167,6 +175,15 @@ void CheckForInputs() {
         octive = 5;
       }
     }
+    if (functionMode == 2) {
+      matrixBrightness += 10;
+      if (matrixBrightness > 200) {
+        matrixBrightness = 200;
+      }
+      matrix.setBrightness(matrixBrightness);
+       matrix.show();
+    }
+    UpdateLcd();
   }
   if (downButton.getSingleDebouncedRelease()) {
     if (functionMode == 0) {
@@ -181,6 +198,15 @@ void CheckForInputs() {
         }
       }
     }
+    if (functionMode == 2) {
+      matrixBrightness -= 10;
+      if (matrixBrightness < 10) {
+        matrixBrightness = 10;
+      }
+      matrix.setBrightness(matrixBrightness);
+      matrix.show();
+    }
+    UpdateLcd();
   }
 
   //matrix input
@@ -249,15 +275,6 @@ void SetHit(int x) {
   UpdateLeds();
 }
 
-void CheckForBrightnessAdjustment() {
-  int brightnessPotValue = brightnessPot.getSector();
-  if (brightnessPotValue != lastBrightnessLevel) {
-    lastBrightnessLevel = brightnessPotValue;
-    matrix.setBrightness(brightnessPotValue);
-    matrix.show();
-  }
-}
-
 void CheckForStep() {
   if (!started) {
     return;
@@ -319,7 +336,35 @@ void UpdateLeds() {
   matrix.show();
 }
 
+void UpdateLcd() {
+  lcd.clear();
+  if (functionMode == 0) {
+    lcd.setCursor(0, 0);
+    // print the number of seconds since reset:
+    lcd.print("BPM");
+    lcd.setCursor(0, 1);
+    // print the number of seconds since reset:
+    lcd.print(bpm);
+  }
+    if (functionMode == 1) {
+    lcd.setCursor(0, 0);
+    // print the number of seconds since reset:
+    lcd.print("OCTAVE");
+    lcd.setCursor(0, 1);
+    // print the number of seconds since reset:
+    lcd.print(octive);
+  }
 
+   if (functionMode == 2) {
+    lcd.setCursor(0, 0);
+    // print the number of seconds since reset:
+    lcd.print("Brightness");
+    lcd.setCursor(0, 1);
+    // print the number of seconds since reset:
+    lcd.print(matrixBrightness);
+  }
+
+}
 
 
 
