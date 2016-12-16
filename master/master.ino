@@ -15,6 +15,7 @@ Pushbutton startStopButton(22);
 Pushbutton functionButton(23);
 Pushbutton upButton(24);
 Pushbutton downButton(25);
+Pushbutton resetPatternButton(26);
 
 //LCD Screen
 LiquidCrystal lcd(13, 12, 11, 10, 9, 8);
@@ -88,6 +89,8 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 int instrumentNotes[] = {43, 42, 41, 40, 39, 38, 37, 36};
 int octive = 0;
 
+
+
 //config values
 int numSteps = 8;
 int bpm = 120;
@@ -157,6 +160,10 @@ void CheckForInputs() {
     started = !started;
   }
 
+  if (resetPatternButton.getSingleDebouncedRelease()) {
+    ResetPattern();
+  }
+
   if (functionButton.getSingleDebouncedRelease()) {
     functionMode ++;
     if (functionMode == 3) {
@@ -181,7 +188,7 @@ void CheckForInputs() {
         matrixBrightness = 200;
       }
       matrix.setBrightness(matrixBrightness);
-       matrix.show();
+      matrix.show();
     }
     UpdateLcd();
   }
@@ -191,13 +198,16 @@ void CheckForInputs() {
       if (bpm < 1) {
         bpm = 1;
       }
-      if (functionMode == 1) {
-        octive --;
-        if (octive < -5) {
-          octive = -5;
-        }
+
+    }
+    
+    if (functionMode == 1) {
+      octive --;
+      if (octive < -5) {
+        octive = -5;
       }
     }
+    
     if (functionMode == 2) {
       matrixBrightness -= 10;
       if (matrixBrightness < 10) {
@@ -264,10 +274,20 @@ void CheckForInputs() {
   }
 }
 
+void ResetPattern() {
+  for (int i = 0; i < 8; i++) {
+    for (int x = 0; x < 8; x ++) {
+      sequence[i][x] = false;
+    }
+  }
+  UpdateLeds();
+}
+
 void SetInstrument(int instrument) {
   selectedInstrument = instrument;
   UpdateLeds();
-  MIDI.sendNoteOn(instrumentNotes[instrument], 100, 1);
+  MIDI.sendNoteOn(instrumentNotes[instrument] + (octive * 8), 100, 1);
+  MIDI.sendNoteOff(instrumentNotes[instrument] + (octive * 8), 100, 1);
 }
 
 void SetHit(int x) {
@@ -305,6 +325,7 @@ void PlayNotes() {
   for (int i = 0; i < 8; i++) {
     if (sequence[i][currentStep] == true) {
       MIDI.sendNoteOn(instrumentNotes[i] + (octive * 8), 100, 1);
+      MIDI.sendNoteOff(instrumentNotes[i] + (octive * 8), 100, 1);
     }
   }
 }
@@ -346,7 +367,7 @@ void UpdateLcd() {
     // print the number of seconds since reset:
     lcd.print(bpm);
   }
-    if (functionMode == 1) {
+  if (functionMode == 1) {
     lcd.setCursor(0, 0);
     // print the number of seconds since reset:
     lcd.print("OCTAVE");
@@ -355,7 +376,7 @@ void UpdateLcd() {
     lcd.print(octive);
   }
 
-   if (functionMode == 2) {
+  if (functionMode == 2) {
     lcd.setCursor(0, 0);
     // print the number of seconds since reset:
     lcd.print("Brightness");
