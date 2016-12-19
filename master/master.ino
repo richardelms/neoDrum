@@ -18,7 +18,7 @@ Pushbutton downButton(25);
 Pushbutton resetPatternButton(26);
 
 //LCD Screen
-LiquidCrystal lcd(13, 12, 11, 10, 9, 8);
+LiquidCrystal lcd(8, 7, 6, 5, 4, 3);
 
 //instrumentbuttons
 Pushbutton instrumentSelect_0(30);
@@ -51,7 +51,7 @@ Pushbutton hitButtons[] = {
 };
 
 //neoPixel definitions
-#define neoOutput 3
+#define neoOutput 2
 Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(8, 8, neoOutput,
                             NEO_MATRIX_TOP     + NEO_MATRIX_LEFT +
                             NEO_MATRIX_ROWS + NEO_MATRIX_PROGRESSIVE,
@@ -87,8 +87,9 @@ const uint16_t colors[] = {
 //midi definitions
 MIDI_CREATE_DEFAULT_INSTANCE();
 int instrumentNotes[] = {43, 42, 41, 40, 39, 38, 37, 36};
+bool notesOn[] = {false, false, false, false, false, false, false, false};
 int octive = 0;
-
+int instrumentVelocities[] = {100, 100, 100, 100, 100, 100, 100, 100};
 
 
 //config values
@@ -98,7 +99,7 @@ bool firstStep = true;
 int matrixBrightness = 20;
 
 //util vars
-int functionMode = 0; //0 = bpm/ 1 = octive/ 2 = brightness
+int functionMode = 0; //0 = bpm/ 1 = octive/2 = velocity  /3 = brightness
 int currentStep = 0;
 int selectedInstrument = 7;
 unsigned long lastStep = 0;
@@ -150,8 +151,6 @@ void InitMatrix() {
 void loop() {
   CheckForStep();
   CheckForInputs();
-
-  //  CheckForBrightnessAdjustment();
 }
 
 void CheckForInputs() {
@@ -166,7 +165,7 @@ void CheckForInputs() {
 
   if (functionButton.getSingleDebouncedRelease()) {
     functionMode ++;
-    if (functionMode == 3) {
+    if (functionMode == 4) {
       functionMode = 0;
     }
     UpdateLcd();
@@ -183,6 +182,12 @@ void CheckForInputs() {
       }
     }
     if (functionMode == 2) {
+      instrumentVelocities[selectedInstrument] ++;
+      if (instrumentVelocities[selectedInstrument] > 127) {
+        instrumentVelocities[selectedInstrument] = 127;
+      }
+    }
+    if (functionMode == 3) {
       matrixBrightness += 10;
       if (matrixBrightness > 200) {
         matrixBrightness = 200;
@@ -198,17 +203,22 @@ void CheckForInputs() {
       if (bpm < 1) {
         bpm = 1;
       }
-
     }
-    
     if (functionMode == 1) {
       octive --;
       if (octive < -5) {
         octive = -5;
       }
     }
-    
+
     if (functionMode == 2) {
+      instrumentVelocities[selectedInstrument] --;
+      if (instrumentVelocities[selectedInstrument] < 0) {
+        instrumentVelocities[selectedInstrument] = 0;
+      }
+    }
+
+    if (functionMode == 3) {
       matrixBrightness -= 10;
       if (matrixBrightness < 10) {
         matrixBrightness = 10;
@@ -286,7 +296,8 @@ void ResetPattern() {
 void SetInstrument(int instrument) {
   selectedInstrument = instrument;
   UpdateLeds();
-  MIDI.sendNoteOn(instrumentNotes[instrument] + (octive * 8), 100, 1);
+  UpdateLcd();
+  MIDI.sendNoteOn(instrumentNotes[instrument] + (octive * 8), instrumentVelocities[instrument], 1);
   MIDI.sendNoteOff(instrumentNotes[instrument] + (octive * 8), 100, 1);
 }
 
@@ -299,6 +310,7 @@ void CheckForStep() {
   if (!started) {
     return;
   }
+
   unsigned long currentMillis = millis();
   if (!firstStep) {
     if (currentMillis - lastStep >= 60000 / (bpm * 2)) {
@@ -317,6 +329,7 @@ void CheckForStep() {
 }
 
 void MakeStep() {
+  CheckForNoteOff();
   PlayNotes();
   UpdateLeds();
 }
@@ -324,8 +337,16 @@ void MakeStep() {
 void PlayNotes() {
   for (int i = 0; i < 8; i++) {
     if (sequence[i][currentStep] == true) {
-      MIDI.sendNoteOn(instrumentNotes[i] + (octive * 8), 100, 1);
-      MIDI.sendNoteOff(instrumentNotes[i] + (octive * 8), 100, 1);
+      MIDI.sendNoteOn(instrumentNotes[i] + (octive * 8), instrumentVelocities[i], 1);
+      notesOn[i] = true;
+    }
+  }
+}
+
+void CheckForNoteOff() {
+  for (int i = 0; i < sizeof(notesOn); i++) {
+    if (notesOn[i]) {
+      MIDI.sendNoteOff(instrumentNotes[i] + (octive * 8), 127, 1);
     }
   }
 }
@@ -377,6 +398,15 @@ void UpdateLcd() {
   }
 
   if (functionMode == 2) {
+    lcd.setCursor(0, 0);
+    // print the number of seconds since reset:
+    lcd.print("VELOCITY");
+    lcd.setCursor(0, 1);
+    // print the number of seconds since reset:
+    lcd.print(instrumentVelocities[selectedInstrument]);
+  }
+
+  if (functionMode == 3) {
     lcd.setCursor(0, 0);
     // print the number of seconds since reset:
     lcd.print("Brightness");
