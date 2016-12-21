@@ -13,9 +13,13 @@
 Potentiometer brightnessPot = Potentiometer(15);
 Pushbutton startStopButton(22);
 Pushbutton functionButton(23);
-Pushbutton upButton(24);
-Pushbutton downButton(25);
+int encoder0 = 24;
+int encoder1 = 25;
 Pushbutton resetPatternButton(26);
+int lastEncoderPosition = 0;
+int encoder0Pos = 0;
+int encoder0PinALast = LOW;
+int n = LOW;
 
 //LCD Screen
 LiquidCrystal lcd(8, 7, 6, 5, 4, 3);
@@ -94,7 +98,7 @@ int instrumentVelocities[] = {100, 100, 100, 100, 100, 100, 100, 100};
 
 //config values
 int numSteps = 8;
-int bpm = 120;
+int bpm = 119;
 bool firstStep = true;
 int matrixBrightness = 20;
 
@@ -105,21 +109,26 @@ int selectedInstrument = 7;
 unsigned long lastStep = 0;
 bool sequence[8][8];
 bool started = false;
+
 // initialisation
 void setup() {
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
   // Print a message to the LCD.
   lcd.print("ginTronics 101");
-  Serial.begin(9600);
-  MIDI.begin(MIDI_CHANNEL_OMNI);
   InitMatrix();
+  MIDI.begin(MIDI_CHANNEL_OMNI);
+  SetupEncoder();
 }
 
-int x = matrix.width();
-int pass = 0;
+void SetupEncoder() {
+  pinMode (encoder0, INPUT);
+  pinMode (encoder1, INPUT);
+}
 
 void InitAnimation() {
+  int x = matrix.width();
+  int pass = 0;
   matrix.setTextWrap(false);
   matrix.setTextColor(colors[0]);
   for (int i = 0; i < 80; i++) {
@@ -139,7 +148,6 @@ void InitAnimation() {
 }
 
 void InitMatrix() {
-  //  brightnessPot.setSectors(255);
   matrix.begin();
   matrix.setBrightness(matrixBrightness);
   matrix.show();
@@ -171,64 +179,6 @@ void CheckForInputs() {
     UpdateLcd();
   }
 
-  if (upButton.getSingleDebouncedRelease()) {
-    if (functionMode == 0) {
-      bpm ++;
-    }
-    if (functionMode == 1) {
-      octive ++;
-      if (octive > 5) {
-        octive = 5;
-      }
-    }
-    if (functionMode == 2) {
-      instrumentVelocities[selectedInstrument] ++;
-      if (instrumentVelocities[selectedInstrument] > 127) {
-        instrumentVelocities[selectedInstrument] = 127;
-      }
-    }
-    if (functionMode == 3) {
-      matrixBrightness += 10;
-      if (matrixBrightness > 200) {
-        matrixBrightness = 200;
-      }
-      matrix.setBrightness(matrixBrightness);
-      matrix.show();
-    }
-    UpdateLcd();
-  }
-  if (downButton.getSingleDebouncedRelease()) {
-    if (functionMode == 0) {
-      bpm --;
-      if (bpm < 1) {
-        bpm = 1;
-      }
-    }
-    if (functionMode == 1) {
-      octive --;
-      if (octive < -5) {
-        octive = -5;
-      }
-    }
-
-    if (functionMode == 2) {
-      instrumentVelocities[selectedInstrument] --;
-      if (instrumentVelocities[selectedInstrument] < 0) {
-        instrumentVelocities[selectedInstrument] = 0;
-      }
-    }
-
-    if (functionMode == 3) {
-      matrixBrightness -= 10;
-      if (matrixBrightness < 10) {
-        matrixBrightness = 10;
-      }
-      matrix.setBrightness(matrixBrightness);
-      matrix.show();
-    }
-    UpdateLcd();
-  }
-
   //matrix input
 
   if (instrumentSelectButtons[0].getSingleDebouncedRelease()) {
@@ -256,8 +206,6 @@ void CheckForInputs() {
     SetInstrument(7);
   }
 
-
-
   if (hitButtons[0].getSingleDebouncedRelease()) {
     SetHit(0);
   }
@@ -282,7 +230,85 @@ void CheckForInputs() {
   if (hitButtons[7].getSingleDebouncedRelease()) {
     SetHit(7);
   }
+  CheckForEncoderInput();
 }
+
+
+void CheckForEncoderInput() {
+  n = digitalRead(encoder0);
+  if ((encoder0PinALast == LOW) && (n == HIGH)) {
+    if (digitalRead(encoder1) == LOW) {
+      encoder0Pos--;
+      DownInput();
+    } else {
+      encoder0Pos++;
+      UpInput();
+    }
+  }
+  encoder0PinALast = n;
+}
+
+void UpInput() {
+  if (functionMode == 0) {
+    bpm ++;
+  }
+  if (functionMode == 1) {
+    octive ++;
+    if (octive > 5) {
+      octive = 5;
+    }
+  }
+  if (functionMode == 2) {
+    instrumentVelocities[selectedInstrument] ++;
+    if (instrumentVelocities[selectedInstrument] > 127) {
+      instrumentVelocities[selectedInstrument] = 127;
+    }
+  }
+  if (functionMode == 3) {
+    matrixBrightness += 10;
+    if (matrixBrightness > 200) {
+      matrixBrightness = 200;
+    }
+    matrix.setBrightness(matrixBrightness);
+    matrix.show();
+  }
+  UpdateLcd();
+}
+
+void DownInput() {
+  if (functionMode == 0) {
+    bpm --;
+    if (bpm < 1) {
+      bpm = 1;
+    }
+  }
+  if (functionMode == 1) {
+    octive --;
+    if (octive < -5) {
+      octive = -5;
+    }
+  }
+
+  if (functionMode == 2) {
+    instrumentVelocities[selectedInstrument] --;
+    if (instrumentVelocities[selectedInstrument] < 0) {
+      instrumentVelocities[selectedInstrument] = 0;
+    }
+  }
+
+  if (functionMode == 3) {
+    matrixBrightness -= 10;
+    if (matrixBrightness < 10) {
+      matrixBrightness = 10;
+    }
+    matrix.setBrightness(matrixBrightness);
+    matrix.show();
+  }
+  UpdateLcd();
+}
+
+
+
 
 void ResetPattern() {
   for (int i = 0; i < 8; i++) {
@@ -310,7 +336,6 @@ void CheckForStep() {
   if (!started) {
     return;
   }
-
   unsigned long currentMillis = millis();
   if (!firstStep) {
     if (currentMillis - lastStep >= 60000 / (bpm * 2)) {
@@ -396,7 +421,6 @@ void UpdateLcd() {
     // print the number of seconds since reset:
     lcd.print(octive);
   }
-
   if (functionMode == 2) {
     lcd.setCursor(0, 0);
     // print the number of seconds since reset:
@@ -405,7 +429,6 @@ void UpdateLcd() {
     // print the number of seconds since reset:
     lcd.print(instrumentVelocities[selectedInstrument]);
   }
-
   if (functionMode == 3) {
     lcd.setCursor(0, 0);
     // print the number of seconds since reset:
@@ -414,7 +437,6 @@ void UpdateLcd() {
     // print the number of seconds since reset:
     lcd.print(matrixBrightness);
   }
-
 }
 
 
