@@ -20,7 +20,7 @@ int lastEncoderPosition = 0;
 int encoder0Pos = 0;
 int encoder0PinALast = LOW;
 int n = LOW;
-
+bool firstEncode = true;
 //LCD Screen
 LiquidCrystal lcd(8, 7, 6, 5, 4, 3);
 
@@ -98,9 +98,10 @@ int instrumentVelocities[] = {100, 100, 100, 100, 100, 100, 100, 100};
 
 //config values
 int numSteps = 8;
-int bpm = 119;
+int bpm = 120;
 bool firstStep = true;
 int matrixBrightness = 20;
+int midiChanel = 1;
 
 //util vars
 int functionMode = 0; //0 = bpm/ 1 = octive/2 = velocity  /3 = brightness
@@ -117,7 +118,7 @@ void setup() {
   // Print a message to the LCD.
   lcd.print("ginTronics 101");
   InitMatrix();
-  MIDI.begin(MIDI_CHANNEL_OMNI);
+  MIDI.begin(midiChanel);
   SetupEncoder();
 }
 
@@ -165,6 +166,7 @@ void CheckForInputs() {
   //controlls
   if (startStopButton.getSingleDebouncedRelease()) {
     started = !started;
+    MIDI.sendControlChange(22,127,midiChanel);
   }
 
   if (resetPatternButton.getSingleDebouncedRelease()) {
@@ -237,6 +239,10 @@ void CheckForInputs() {
 void CheckForEncoderInput() {
   n = digitalRead(encoder0);
   if ((encoder0PinALast == LOW) && (n == HIGH)) {
+    if (firstEncode) {
+      firstEncode = false;
+      return;
+    }
     if (digitalRead(encoder1) == LOW) {
       encoder0Pos--;
       DownInput();
@@ -323,8 +329,8 @@ void SetInstrument(int instrument) {
   selectedInstrument = instrument;
   UpdateLeds();
   UpdateLcd();
-  MIDI.sendNoteOn(instrumentNotes[instrument] + (octive * 8), instrumentVelocities[instrument], 1);
-  MIDI.sendNoteOff(instrumentNotes[instrument] + (octive * 8), 100, 1);
+  MIDI.sendNoteOn(instrumentNotes[instrument] + (octive * 8), instrumentVelocities[instrument], midiChanel);
+  MIDI.sendNoteOff(instrumentNotes[instrument] + (octive * 8), 100, midiChanel);
 }
 
 void SetHit(int x) {
@@ -362,7 +368,7 @@ void MakeStep() {
 void PlayNotes() {
   for (int i = 0; i < 8; i++) {
     if (sequence[i][currentStep] == true) {
-      MIDI.sendNoteOn(instrumentNotes[i] + (octive * 8), instrumentVelocities[i], 1);
+      MIDI.sendNoteOn(instrumentNotes[i] + (octive * 8), instrumentVelocities[i], midiChanel);
       notesOn[i] = true;
     }
   }
@@ -371,7 +377,7 @@ void PlayNotes() {
 void CheckForNoteOff() {
   for (int i = 0; i < sizeof(notesOn); i++) {
     if (notesOn[i]) {
-      MIDI.sendNoteOff(instrumentNotes[i] + (octive * 8), 127, 1);
+      MIDI.sendNoteOff(instrumentNotes[i] + (octive * 8), 127, midiChanel);
     }
   }
 }
