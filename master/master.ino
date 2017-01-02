@@ -110,6 +110,7 @@ int selectedInstrument = 7;
 unsigned long lastStep = 0;
 bool sequence[8][8];
 bool started = false;
+int midiClockCount = 0;
 
 // initialisation
 void setup() {
@@ -119,6 +120,8 @@ void setup() {
   lcd.print("ginTronics 101");
   InitMatrix();
   MIDI.begin(midiChanel);
+  MIDI.setHandleClock(HandleClockTick);
+  MIDI.setHandleStop(HandleStop);
   SetupEncoder();
 }
 
@@ -152,21 +155,66 @@ void InitMatrix() {
   matrix.begin();
   matrix.setBrightness(matrixBrightness);
   matrix.show();
-  InitAnimation();
+//  InitAnimation();
   UpdateLeds();
 }
 
 // program loop
 void loop() {
+  MIDI.read();
   CheckForStep();
   CheckForInputs();
+}
+
+bool firstMidiStep = true;
+
+void HandleClockTick() {
+  if (midiClockCount % 12 == 0) {
+    if (!firstMidiStep) {
+      currentStep ++;
+      if (currentStep == numSteps) {
+        currentStep = 0;
+      }
+    }
+    firstMidiStep = false;
+    MakeStep();
+  }
+  midiClockCount ++;
+}
+
+void HandleStop() {
+  firstMidiStep = true;
+  midiClockCount = 0;
+  currentStep = 0;
+  UpdateLeds();
+}
+
+void CheckForStep() {
+  if (!started) {
+    return;
+  }
+  unsigned long currentMillis = millis();
+  if (!firstStep) {
+    if (currentMillis - lastStep >= 60000 / (bpm * 2)) {
+      lastStep = currentMillis;
+      currentStep ++;
+      if (currentStep == numSteps) {
+        currentStep = 0;
+      }
+      MakeStep();
+    }
+  } else {
+    lastStep = currentMillis;
+    firstStep = false;
+    MakeStep();
+  }
 }
 
 void CheckForInputs() {
   //controlls
   if (startStopButton.getSingleDebouncedRelease()) {
     started = !started;
-    MIDI.sendControlChange(22,127,midiChanel);
+    MIDI.sendControlChange(22, 127, midiChanel);
   }
 
   if (resetPatternButton.getSingleDebouncedRelease()) {
@@ -336,27 +384,6 @@ void SetInstrument(int instrument) {
 void SetHit(int x) {
   sequence[selectedInstrument][x] = !sequence[selectedInstrument][x];
   UpdateLeds();
-}
-
-void CheckForStep() {
-  if (!started) {
-    return;
-  }
-  unsigned long currentMillis = millis();
-  if (!firstStep) {
-    if (currentMillis - lastStep >= 60000 / (bpm * 2)) {
-      lastStep = currentMillis;
-      currentStep ++;
-      if (currentStep == numSteps) {
-        currentStep = 0;
-      }
-      MakeStep();
-    }
-  } else {
-    lastStep = currentMillis;
-    firstStep = false;
-    MakeStep();
-  }
 }
 
 void MakeStep() {
