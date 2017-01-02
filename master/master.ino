@@ -98,31 +98,38 @@ int instrumentVelocities[] = {100, 100, 100, 100, 100, 100, 100, 100};
 
 //config values
 int numSteps = 8;
-int bpm = 120;
-bool firstStep = true;
+int functionMode = 0; //0 = bpm/ 1 = octive/2 = velocity  /3 = brightness /4 = master or slave
 int matrixBrightness = 20;
 int midiChanel = 1;
 
 //util vars
-int functionMode = 0; //0 = bpm/ 1 = octive/2 = velocity  /3 = brightness
+int bpm = 120;
+bool firstStep = true;
 int currentStep = 0;
 int selectedInstrument = 7;
 unsigned long lastStep = 0;
 bool sequence[8][8];
 bool started = false;
 int midiClockCount = 0;
+bool firstMidiStep = true;
 
 // initialisation
 void setup() {
-  // set up the LCD's number of columns and rows:
-  lcd.begin(16, 2);
-  // Print a message to the LCD.
-  lcd.print("ginTronics 101");
+  SetupLcd();
   InitMatrix();
+  SetupMidi();
+  SetupEncoder();
+}
+
+void SetupLcd() {
+  lcd.begin(16, 2);
+  lcd.print("ginTronics 101");
+}
+
+void SetupMidi() {
   MIDI.begin(midiChanel);
   MIDI.setHandleClock(HandleClockTick);
   MIDI.setHandleStop(HandleStop);
-  SetupEncoder();
 }
 
 void SetupEncoder() {
@@ -130,348 +137,19 @@ void SetupEncoder() {
   pinMode (encoder1, INPUT);
 }
 
-void InitAnimation() {
-  int x = matrix.width();
-  int pass = 0;
-  matrix.setTextWrap(false);
-  matrix.setTextColor(colors[0]);
-  for (int i = 0; i < 80; i++) {
-    matrix.fillScreen(0);
-    matrix.setCursor(x, 0);
-    matrix.print(F("ginTronics"));
-    --x;
-    pass ++;
-    if (pass == 6) {
-      pass = 0;
-    }
-    matrix.setTextColor(colors[pass]);
-    matrix.show();
-    delay(60);
-  }
-  UpdateLcd();
-}
-
 void InitMatrix() {
   matrix.begin();
   matrix.setBrightness(matrixBrightness);
   matrix.show();
-//  InitAnimation();
+  InitAnimation();
   UpdateLeds();
 }
 
 // program loop
 void loop() {
   MIDI.read();
+  DebugMidi();
   CheckForStep();
   CheckForInputs();
 }
-
-bool firstMidiStep = true;
-
-void HandleClockTick() {
-  if (midiClockCount % 12 == 0) {
-    if (!firstMidiStep) {
-      currentStep ++;
-      if (currentStep == numSteps) {
-        currentStep = 0;
-      }
-    }
-    firstMidiStep = false;
-    MakeStep();
-  }
-  midiClockCount ++;
-}
-
-void HandleStop() {
-  firstMidiStep = true;
-  midiClockCount = 0;
-  currentStep = 0;
-  UpdateLeds();
-}
-
-void CheckForStep() {
-  if (!started) {
-    return;
-  }
-  unsigned long currentMillis = millis();
-  if (!firstStep) {
-    if (currentMillis - lastStep >= 60000 / (bpm * 2)) {
-      lastStep = currentMillis;
-      currentStep ++;
-      if (currentStep == numSteps) {
-        currentStep = 0;
-      }
-      MakeStep();
-    }
-  } else {
-    lastStep = currentMillis;
-    firstStep = false;
-    MakeStep();
-  }
-}
-
-void CheckForInputs() {
-  //controlls
-  if (startStopButton.getSingleDebouncedRelease()) {
-    started = !started;
-    MIDI.sendControlChange(22, 127, midiChanel);
-  }
-
-  if (resetPatternButton.getSingleDebouncedRelease()) {
-    ResetPattern();
-  }
-
-  if (functionButton.getSingleDebouncedRelease()) {
-    functionMode ++;
-    if (functionMode == 4) {
-      functionMode = 0;
-    }
-    UpdateLcd();
-  }
-
-  //matrix input
-
-  if (instrumentSelectButtons[0].getSingleDebouncedRelease()) {
-    SetInstrument(0);
-  }
-  if (instrumentSelectButtons[1].getSingleDebouncedRelease()) {
-    SetInstrument(1);
-  }
-  if (instrumentSelectButtons[2].getSingleDebouncedRelease()) {
-    SetInstrument(2);
-  }
-  if (instrumentSelectButtons[3].getSingleDebouncedRelease()) {
-    SetInstrument(3);
-  }
-  if (instrumentSelectButtons[4].getSingleDebouncedRelease()) {
-    SetInstrument(4);
-  }
-  if (instrumentSelectButtons[5].getSingleDebouncedRelease()) {
-    SetInstrument(5);
-  }
-  if (instrumentSelectButtons[6].getSingleDebouncedRelease()) {
-    SetInstrument(6);
-  }
-  if (instrumentSelectButtons[7].getSingleDebouncedRelease()) {
-    SetInstrument(7);
-  }
-
-  if (hitButtons[0].getSingleDebouncedRelease()) {
-    SetHit(0);
-  }
-  if (hitButtons[1].getSingleDebouncedRelease()) {
-    SetHit(1);
-  }
-  if (hitButtons[2].getSingleDebouncedRelease()) {
-    SetHit(2);
-  }
-  if (hitButtons[3].getSingleDebouncedRelease()) {
-    SetHit(3);
-  }
-  if (hitButtons[4].getSingleDebouncedRelease()) {
-    SetHit(4);
-  }
-  if (hitButtons[5].getSingleDebouncedRelease()) {
-    SetHit(5);
-  }
-  if (hitButtons[6].getSingleDebouncedRelease()) {
-    SetHit(6);
-  }
-  if (hitButtons[7].getSingleDebouncedRelease()) {
-    SetHit(7);
-  }
-  CheckForEncoderInput();
-}
-
-
-void CheckForEncoderInput() {
-  n = digitalRead(encoder0);
-  if ((encoder0PinALast == LOW) && (n == HIGH)) {
-    if (firstEncode) {
-      firstEncode = false;
-      return;
-    }
-    if (digitalRead(encoder1) == LOW) {
-      encoder0Pos--;
-      DownInput();
-    } else {
-      encoder0Pos++;
-      UpInput();
-    }
-  }
-  encoder0PinALast = n;
-}
-
-void UpInput() {
-  if (functionMode == 0) {
-    bpm ++;
-  }
-  if (functionMode == 1) {
-    octive ++;
-    if (octive > 5) {
-      octive = 5;
-    }
-  }
-  if (functionMode == 2) {
-    instrumentVelocities[selectedInstrument] ++;
-    if (instrumentVelocities[selectedInstrument] > 127) {
-      instrumentVelocities[selectedInstrument] = 127;
-    }
-  }
-  if (functionMode == 3) {
-    matrixBrightness += 10;
-    if (matrixBrightness > 200) {
-      matrixBrightness = 200;
-    }
-    matrix.setBrightness(matrixBrightness);
-    matrix.show();
-  }
-  UpdateLcd();
-}
-
-void DownInput() {
-  if (functionMode == 0) {
-    bpm --;
-    if (bpm < 1) {
-      bpm = 1;
-    }
-  }
-  if (functionMode == 1) {
-    octive --;
-    if (octive < -5) {
-      octive = -5;
-    }
-  }
-
-  if (functionMode == 2) {
-    instrumentVelocities[selectedInstrument] --;
-    if (instrumentVelocities[selectedInstrument] < 0) {
-      instrumentVelocities[selectedInstrument] = 0;
-    }
-  }
-
-  if (functionMode == 3) {
-    matrixBrightness -= 10;
-    if (matrixBrightness < 10) {
-      matrixBrightness = 10;
-    }
-    matrix.setBrightness(matrixBrightness);
-    matrix.show();
-  }
-  UpdateLcd();
-}
-
-
-
-
-void ResetPattern() {
-  for (int i = 0; i < 8; i++) {
-    for (int x = 0; x < 8; x ++) {
-      sequence[i][x] = false;
-    }
-  }
-  UpdateLeds();
-}
-
-void SetInstrument(int instrument) {
-  selectedInstrument = instrument;
-  UpdateLeds();
-  UpdateLcd();
-  MIDI.sendNoteOn(instrumentNotes[instrument] + (octive * 8), instrumentVelocities[instrument], midiChanel);
-  MIDI.sendNoteOff(instrumentNotes[instrument] + (octive * 8), 100, midiChanel);
-}
-
-void SetHit(int x) {
-  sequence[selectedInstrument][x] = !sequence[selectedInstrument][x];
-  UpdateLeds();
-}
-
-void MakeStep() {
-  CheckForNoteOff();
-  PlayNotes();
-  UpdateLeds();
-}
-
-void PlayNotes() {
-  for (int i = 0; i < 8; i++) {
-    if (sequence[i][currentStep] == true) {
-      MIDI.sendNoteOn(instrumentNotes[i] + (octive * 8), instrumentVelocities[i], midiChanel);
-      notesOn[i] = true;
-    }
-  }
-}
-
-void CheckForNoteOff() {
-  for (int i = 0; i < sizeof(notesOn); i++) {
-    if (notesOn[i]) {
-      MIDI.sendNoteOff(instrumentNotes[i] + (octive * 8), 127, midiChanel);
-    }
-  }
-}
-
-void UpdateLeds() {
-  int masterIndex = 0;
-  for (int i = 0; i < 8; i++) {
-    for (int x = 0; x < 8; x ++) {
-      if (sequence[i][x] == true) {
-        if (currentStep == x) {
-          matrix.setPixelColor(masterIndex, selectedAndStepColor.r, selectedAndStepColor.g, selectedAndStepColor.b);
-        } else {
-          matrix.setPixelColor(masterIndex, selectedColor.r, selectedColor.g, selectedColor.b);
-        }
-      } else {
-        if (currentStep == x) {
-          matrix.setPixelColor(masterIndex, normalStepColor.r, normalStepColor.g, normalStepColor.b);
-        } else {
-          if (selectedInstrument == i) {
-            matrix.setPixelColor(masterIndex, selectedInstrumentColor.r, selectedInstrumentColor.g, selectedInstrumentColor.b);
-          } else {
-            matrix.setPixelColor(masterIndex, baseUnselectedValue.r, baseUnselectedValue.g, baseUnselectedValue.b);
-          }
-        }
-      }
-      masterIndex++;
-    }
-  }
-  matrix.show();
-}
-
-void UpdateLcd() {
-  lcd.clear();
-  if (functionMode == 0) {
-    lcd.setCursor(0, 0);
-    // print the number of seconds since reset:
-    lcd.print("BPM");
-    lcd.setCursor(0, 1);
-    // print the number of seconds since reset:
-    lcd.print(bpm);
-  }
-  if (functionMode == 1) {
-    lcd.setCursor(0, 0);
-    // print the number of seconds since reset:
-    lcd.print("OCTAVE");
-    lcd.setCursor(0, 1);
-    // print the number of seconds since reset:
-    lcd.print(octive);
-  }
-  if (functionMode == 2) {
-    lcd.setCursor(0, 0);
-    // print the number of seconds since reset:
-    lcd.print("VELOCITY");
-    lcd.setCursor(0, 1);
-    // print the number of seconds since reset:
-    lcd.print(instrumentVelocities[selectedInstrument]);
-  }
-  if (functionMode == 3) {
-    lcd.setCursor(0, 0);
-    // print the number of seconds since reset:
-    lcd.print("Brightness");
-    lcd.setCursor(0, 1);
-    // print the number of seconds since reset:
-    lcd.print(matrixBrightness);
-  }
-}
-
-
-
 
