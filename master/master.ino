@@ -7,6 +7,7 @@
 #include <Pushbutton.h>
 #include <Adafruit_NeoPixel.h>
 #include <LiquidCrystal.h>
+#include <EEPROM.h>
 
 //input definitions
 //controlls
@@ -98,6 +99,7 @@ int instrumentVelocities[] = {100, 100, 100, 100, 100, 100, 100, 100};
 
 //config values
 int numSteps = 8;
+int totalMatrixSize = 64;
 int functionMode = 0; //0 = bpm/ 1 = octive/2 = velocity  /3 = brightness /4 = master or slave
 int matrixBrightness = 20;
 int midiChanel = 1;
