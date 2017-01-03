@@ -14,6 +14,7 @@
 Potentiometer brightnessPot = Potentiometer(15);
 Pushbutton startStopButton(22);
 Pushbutton functionButton(23);
+Pushbutton inputMonitorButton(29);
 int encoder0 = 24;
 int encoder1 = 25;
 Pushbutton resetPatternButton(26);
@@ -22,6 +23,7 @@ int encoder0Pos = 0;
 int encoder0PinALast = LOW;
 int n = LOW;
 bool firstEncode = true;
+
 //LCD Screen
 LiquidCrystal lcd(8, 7, 6, 5, 4, 3);
 
@@ -117,6 +119,9 @@ bool firstMidiStep = true;
 
 // initialisation
 void setup() {
+//  //organise this yoooooo its for the input monitoring led
+  pinMode(28, OUTPUT);
+
   SetupLcd();
   InitMatrix();
   SetupMidi();
@@ -143,13 +148,12 @@ void InitMatrix() {
   matrix.begin();
   matrix.setBrightness(matrixBrightness);
   matrix.show();
-  InitAnimation();
+//  InitAnimation();
   UpdateLeds();
 }
 
 // program loop
 void loop() {
-  MIDI.read();
   DebugMidi();
   CheckForStep();
   CheckForInputs();

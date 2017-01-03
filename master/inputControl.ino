@@ -1,4 +1,13 @@
 void CheckForInputs() {
+
+  //led monitors
+  if (!inputMonitorButton.isPressed()) {
+    digitalWrite(28, HIGH);
+  } else {
+    digitalWrite(28, LOW);
+  }
+
+
   //controlls
   if (startStopButton.getSingleDebouncedRelease()) {
     started = !started;
@@ -8,15 +17,6 @@ void CheckForInputs() {
   if (resetPatternButton.getSingleDebouncedRelease()) {
     ResetPattern();
   }
-
-  if (functionButton.getSingleDebouncedRelease()) {
-    functionMode ++;
-    if (functionMode == 4) {
-      functionMode = 0;
-    }
-    UpdateLcd();
-  }
-
   //matrix input
 
   if (instrumentSelectButtons[0].getSingleDebouncedRelease()) {
@@ -91,6 +91,15 @@ void CheckForEncoderInput() {
 }
 
 void UpInput() {
+  if (!functionButton.isPressed())
+  {
+    functionMode ++;
+    if (functionMode == 4) {
+      functionMode = 0;
+    }
+    UpdateLcd();
+    return;
+  }
   if (functionMode == 0) {
     bpm ++;
   }
@@ -118,6 +127,15 @@ void UpInput() {
 }
 
 void DownInput() {
+  if (!functionButton.isPressed())
+  {
+    functionMode --;
+    if (functionMode < 0) {
+      functionMode = 3;
+    }
+    UpdateLcd();
+    return;
+  }
   if (functionMode == 0) {
     bpm --;
     if (bpm < 1) {
@@ -162,8 +180,10 @@ void SetInstrument(int instrument) {
   selectedInstrument = instrument;
   UpdateLeds();
   UpdateLcd();
-  MIDI.sendNoteOn(instrumentNotes[instrument] + (octive * 8), instrumentVelocities[instrument], midiChanel);
-  MIDI.sendNoteOff(instrumentNotes[instrument] + (octive * 8), 100, midiChanel);
+  if (!inputMonitorButton.isPressed()) {
+    MIDI.sendNoteOn(instrumentNotes[instrument] + (octive * 8), instrumentVelocities[instrument], midiChanel);
+    MIDI.sendNoteOff(instrumentNotes[instrument] + (octive * 8), 100, midiChanel);
+  }
 }
 
 void SetHit(int x) {
