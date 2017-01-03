@@ -68,8 +68,18 @@ void CheckForInputs() {
   if (hitButtons[7].getSingleDebouncedRelease()) {
     SetHit(7);
   }
-  CheckForEncoderInput();
 }
+
+//void CheckForSaveAndLoadInput() {
+//  if (encoderButton.getSingleDebouncedPress()) {
+//    if (functionMode == 5) {
+//      SaveSequence(currentSavePattern);
+//    }
+//    if (functionMode == 6) {
+//      LoadSequence(currentLoadPattern);
+//    }
+//  }
+//}
 
 
 void CheckForEncoderInput() {
@@ -91,10 +101,10 @@ void CheckForEncoderInput() {
 }
 
 void UpInput() {
-  if (!functionButton.isPressed())
+  if (encoderButton.isPressed())
   {
     functionMode ++;
-    if (functionMode == 4) {
+    if (functionMode == numFunctions) {
       functionMode = 0;
     }
     UpdateLcd();
@@ -123,15 +133,30 @@ void UpInput() {
     matrix.setBrightness(matrixBrightness);
     matrix.show();
   }
+  if (functionMode == 4) {
+    master = !master;
+  }
+  if (functionMode == 5) {
+    currentSavePattern ++;
+    if (currentSavePattern > numPatterns) {
+      currentSavePattern = numPatterns;
+    }
+  }
+  if (functionMode == 6) {
+    currentLoadPattern ++;
+    if (currentLoadPattern > numPatterns) {
+      currentLoadPattern = numPatterns;
+    }
+  }
   UpdateLcd();
 }
 
 void DownInput() {
-  if (!functionButton.isPressed())
+  if (encoderButton.isPressed())
   {
     functionMode --;
     if (functionMode < 0) {
-      functionMode = 3;
+      functionMode = numFunctions - 1;
     }
     UpdateLcd();
     return;
@@ -163,6 +188,21 @@ void DownInput() {
     }
     matrix.setBrightness(matrixBrightness);
     matrix.show();
+  }
+  if (functionMode == 4) {
+    master = !master;
+  }
+  if (functionMode == 5) {
+    currentSavePattern --;
+    if (currentSavePattern < 0) {
+      currentSavePattern = 0;
+    }
+  }
+  if (functionMode == 6) {
+    currentLoadPattern --;
+    if (currentLoadPattern < 0) {
+      currentLoadPattern = 0;
+    }
   }
   UpdateLcd();
 }

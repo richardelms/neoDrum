@@ -18,6 +18,7 @@ Pushbutton inputMonitorButton(29);
 int encoder0 = 24;
 int encoder1 = 25;
 Pushbutton resetPatternButton(26);
+Pushbutton encoderButton(27);
 int lastEncoderPosition = 0;
 int encoder0Pos = 0;
 int encoder0PinALast = LOW;
@@ -102,9 +103,9 @@ int instrumentVelocities[] = {100, 100, 100, 100, 100, 100, 100, 100};
 //config values
 int numSteps = 8;
 int totalMatrixSize = 64;
-int functionMode = 0; //0 = bpm/ 1 = octive/2 = velocity  /3 = brightness /4 = master or slave
-int matrixBrightness = 20;
-int midiChanel = 1;
+int numFunctions = 7;
+int numPatterns = 5;
+
 
 //util vars
 int bpm = 120;
@@ -116,6 +117,12 @@ bool sequence[8][8];
 bool started = false;
 int midiClockCount = 0;
 bool firstMidiStep = true;
+bool master = true;
+int currentSavePattern = 0;
+int currentLoadPattern = 0;
+int functionMode = 0; //0 = bpm/ 1 = octive/2 = velocity  /3 = brightness /4 = master or slave/ 5 = save / 6 = load
+int matrixBrightness = 20;
+int midiChanel = 1;
 
 // initialisation
 void setup() {
