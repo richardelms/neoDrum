@@ -1,12 +1,10 @@
 void CheckForInputs() {
-
   //led monitors
   if (!inputMonitorButton.isPressed()) {
     digitalWrite(28, HIGH);
   } else {
     digitalWrite(28, LOW);
   }
-
 
   //controlls
   if (startStopButton.getSingleDebouncedRelease()) {
@@ -68,6 +66,7 @@ void CheckForInputs() {
   if (hitButtons[7].getSingleDebouncedRelease()) {
     SetHit(7);
   }
+  CheckForEncoderInput();
 }
 
 //void CheckForSaveAndLoadInput() {
@@ -101,7 +100,7 @@ void CheckForEncoderInput() {
 }
 
 void UpInput() {
-  if (encoderButton.isPressed())
+  if (!functionButton.isPressed())
   {
     functionMode ++;
     if (functionMode == numFunctions) {
@@ -148,11 +147,18 @@ void UpInput() {
       currentLoadPattern = numPatterns;
     }
   }
+  
+  if (functionMode == 7) {
+    patternScale /= 2;
+    if (patternScale < 6) {
+      patternScale = 6;
+    }
+  }
   UpdateLcd();
 }
 
 void DownInput() {
-  if (encoderButton.isPressed())
+  if (!functionButton.isPressed())
   {
     functionMode --;
     if (functionMode < 0) {
@@ -202,6 +208,12 @@ void DownInput() {
     currentLoadPattern --;
     if (currentLoadPattern < 0) {
       currentLoadPattern = 0;
+    }
+  }
+  if (functionMode == 7) {
+    patternScale *= 2;
+    if (patternScale > 192) {
+      patternScale = 192;
     }
   }
   UpdateLcd();

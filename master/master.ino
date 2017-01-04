@@ -103,7 +103,7 @@ int instrumentVelocities[] = {100, 100, 100, 100, 100, 100, 100, 100};
 //config values
 int numSteps = 8;
 int totalMatrixSize = 64;
-int numFunctions = 7;
+int numFunctions = 8;
 int numPatterns = 5;
 
 
@@ -117,12 +117,13 @@ bool sequence[8][8];
 bool started = false;
 int midiClockCount = 0;
 bool firstMidiStep = true;
-bool master = true;
+bool master = false;
 int currentSavePattern = 0;
 int currentLoadPattern = 0;
-int functionMode = 0; //0 = bpm/ 1 = octive/2 = velocity  /3 = brightness /4 = master or slave/ 5 = save / 6 = load
+int functionMode = 0; //0 = bpm/ 1 = octive/2 = velocity  /3 = brightness /4 = master or slave/ 5 = save / 6 = load / 7 = pattern scale
 int matrixBrightness = 20;
 int midiChanel = 1;
+int patternScale = 24;
 
 // initialisation
 void setup() {

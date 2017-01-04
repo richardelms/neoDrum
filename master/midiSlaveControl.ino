@@ -4,11 +4,12 @@ void DebugMidi() {
   }
   if (MIDI.read())
   {
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print(MIDI.getType());
-    lcd.setCursor(0, 1);
-    lcd.print(MIDI.getData1());
+//    for debug
+//    lcd.clear();
+//    lcd.setCursor(0, 0);
+//    lcd.print(MIDI.getType());
+//    lcd.setCursor(0, 1);
+//    lcd.print(MIDI.getData1());
 
 
     switch (MIDI.getType()) {
@@ -23,7 +24,7 @@ void DebugMidi() {
 }
 
 void HandleClockTick() {
-  if (midiClockCount % 24 == 0) {
+  if (midiClockCount % patternScale == 0) {
     if (!firstMidiStep) {
       currentStep ++;
       if (currentStep == numSteps) {

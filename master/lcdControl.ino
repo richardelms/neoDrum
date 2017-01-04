@@ -46,5 +46,33 @@ void UpdateLcd() {
     lcd.setCursor(0, 1);
     lcd.print(currentLoadPattern);
   }
+  if (functionMode == 7) {
+    lcd.setCursor(0, 0);
+    lcd.print("NOTE SCALE");
+    String noteScale = "";
+    switch (patternScale) {
+      case 6:
+        noteScale = "4/32";
+                    break;
+      case 12:
+        noteScale = "4/16";
+                    break;
+      case 24:
+        noteScale = "4/8";
+                    break;
+      case 48:
+        noteScale = "4/4";
+                    break;
+                    case 96:
+        noteScale = "4/2";
+                    break;
+                     case 192:
+        noteScale = "4/1";
+                    break;
+
+    }
+    lcd.setCursor(0, 1);
+    lcd.print(noteScale);
+  }
 }
 

@@ -1,5 +1,5 @@
 void CheckForStep() {
-  if (!started) {
+  if (!started || !master) {
     return;
   }
   unsigned long currentMillis = millis();
