@@ -23,7 +23,7 @@ void UpdateLeds() {
   int masterIndex = 0;
   for (int i = 0; i < 8; i++) {
     for (int x = 0; x < 8; x ++) {
-      if (sequence[i][x] == true) {
+      if (sequence[i][x].on) {
         if (currentStep == x) {
           matrix.setPixelColor(masterIndex, selectedAndStepColor.r, selectedAndStepColor.g, selectedAndStepColor.b);
         } else {

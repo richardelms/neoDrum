@@ -4,14 +4,12 @@ void DebugMidi() {
   }
   if (MIDI.read())
   {
-//    for debug
-//    lcd.clear();
-//    lcd.setCursor(0, 0);
-//    lcd.print(MIDI.getType());
-//    lcd.setCursor(0, 1);
-//    lcd.print(MIDI.getData1());
-
-
+    //    for debug
+    //    lcd.clear();
+    //    lcd.setCursor(0, 0);
+    //    lcd.print(MIDI.getType());
+    //    lcd.setCursor(0, 1);
+    //    lcd.print(MIDI.getData1());
     switch (MIDI.getType()) {
       case 248:
         HandleClockTick();
@@ -23,7 +21,15 @@ void DebugMidi() {
   }
 }
 
+
+
+
+
+
 void HandleClockTick() {
+  if (midiClockCount % 4 == 0) {
+    CheckForNotes();
+  }
   if (midiClockCount % patternScale == 0) {
     if (!firstMidiStep) {
       currentStep ++;
@@ -35,7 +41,24 @@ void HandleClockTick() {
     MakeStep();
   }
   midiClockCount ++;
+  if (midiClockCount == (patternScale * numSteps)) {
+    midiClockCount = 0;
+  }
 }
+
+
+
+void CheckForNotes() {
+  for (int i = 0; i < 8; i ++) {
+    for (int x = 0; x < numSteps; x ++) {
+      if (sequence[i][x].ShouldPlay(midiClockCount)) {
+        MIDI.sendNoteOn(instrumentNotes[sequence[i][x].instrument] + (octive * 8), sequence[i][x].velocity, midiChanel);
+        notesOn[sequence[i][x].instrument] = true;
+      }
+    }
+  }
+}
+
 
 void HandleStop() {
   firstMidiStep = true;

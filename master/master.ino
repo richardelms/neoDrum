@@ -58,6 +58,8 @@ Pushbutton hitButtons[] = {
   hitButton_6, hitButton_7
 };
 
+
+
 //neoPixel definitions
 #define neoOutput 2
 Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(8, 8, neoOutput,
@@ -98,6 +100,28 @@ int instrumentNotes[] = {43, 42, 41, 40, 39, 38, 37, 36};
 bool notesOn[] = {false, false, false, false, false, false, false, false};
 int octive = 0;
 int instrumentVelocities[] = {100, 100, 100, 100, 100, 100, 100, 100};
+int midiChanel = 1;
+
+class Note
+{
+  public:
+    int sequencePosition;
+    int instrument;
+    int velocity = 100;
+    int SwingAmount;
+    bool on;
+    bool ShouldPlay(int);
+};
+bool Note::ShouldPlay(int midiClockPosition) {
+  if (on == true && midiClockPosition == ((sequencePosition * 24) + SwingAmount)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
+
 
 
 //config values
@@ -113,7 +137,9 @@ bool firstStep = true;
 int currentStep = 0;
 int selectedInstrument = 7;
 unsigned long lastStep = 0;
-bool sequence[8][8];
+
+Note sequence[8][8];
+
 bool started = false;
 int midiClockCount = 0;
 bool firstMidiStep = true;
@@ -122,18 +148,26 @@ int currentSavePattern = 0;
 int currentLoadPattern = 0;
 int functionMode = 0; //0 = bpm/ 1 = octive/2 = velocity  /3 = brightness /4 = master or slave/ 5 = save / 6 = load / 7 = pattern scale
 int matrixBrightness = 20;
-int midiChanel = 1;
 int patternScale = 24;
 
 // initialisation
 void setup() {
-//  //organise this yoooooo its for the input monitoring led
+  //  //organise this yoooooo its for the input monitoring led
+  InitSequence();
   pinMode(28, OUTPUT);
-
   SetupLcd();
   InitMatrix();
   SetupMidi();
   SetupEncoder();
+}
+
+void InitSequence() {
+  for (int i = 0; i < 8; i ++) {
+    for (int x = 0; x < numSteps; x ++) {
+      sequence[i][x].sequencePosition = x;
+      sequence[i][x].instrument = i;
+    }
+  }
 }
 
 void SetupLcd() {
@@ -156,14 +190,14 @@ void InitMatrix() {
   matrix.begin();
   matrix.setBrightness(matrixBrightness);
   matrix.show();
-//  InitAnimation();
+  //  InitAnimation();
   UpdateLeds();
 }
 
 // program loop
 void loop() {
   DebugMidi();
-  CheckForStep();
+  //  CheckForStep();
   CheckForInputs();
 }
 

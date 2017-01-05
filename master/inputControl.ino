@@ -222,7 +222,7 @@ void DownInput() {
 void ResetPattern() {
   for (int i = 0; i < 8; i++) {
     for (int x = 0; x < 8; x ++) {
-      sequence[i][x] = false;
+      sequence[i][x].on = false;
     }
   }
   UpdateLeds();
@@ -239,6 +239,6 @@ void SetInstrument(int instrument) {
 }
 
 void SetHit(int x) {
-  sequence[selectedInstrument][x] = !sequence[selectedInstrument][x];
+  sequence[selectedInstrument][x].on = !sequence[selectedInstrument][x].on;
   UpdateLeds();
 }
