@@ -40,6 +40,9 @@ void UpdateLeds() {
           }
         }
       }
+      if (sequence[i][x].noteID == selectedNote.noteID) {
+        matrix.setPixelColor(masterIndex, selectedNoteColor.r, selectedNoteColor.g, selectedNoteColor.b);
+      }
       masterIndex++;
     }
   }

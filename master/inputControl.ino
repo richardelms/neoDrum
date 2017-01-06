@@ -1,6 +1,6 @@
 void CheckForInputs() {
   //led monitors
-  if (!inputMonitorButton.isPressed()) {
+  if (!shiftButton.isPressed()) {
     digitalWrite(28, HIGH);
   } else {
     digitalWrite(28, LOW);
@@ -119,9 +119,9 @@ void UpInput() {
     }
   }
   if (functionMode == 2) {
-    instrumentVelocities[selectedInstrument] ++;
-    if (instrumentVelocities[selectedInstrument] > 127) {
-      instrumentVelocities[selectedInstrument] = 127;
+    sequence[selectedNote.instrument][selectedNote.sequencePosition].velocity ++;
+    if (sequence[selectedNote.instrument][selectedNote.sequencePosition].velocity > 127) {
+      sequence[selectedNote.instrument][selectedNote.sequencePosition].velocity = 127;
     }
   }
   if (functionMode == 3) {
@@ -181,9 +181,9 @@ void DownInput() {
   }
 
   if (functionMode == 2) {
-    instrumentVelocities[selectedInstrument] --;
-    if (instrumentVelocities[selectedInstrument] < 0) {
-      instrumentVelocities[selectedInstrument] = 0;
+    sequence[selectedNote.instrument][selectedNote.sequencePosition].velocity --;
+    if (sequence[selectedNote.instrument][selectedNote.sequencePosition].velocity < 0) {
+      sequence[selectedNote.instrument][selectedNote.sequencePosition].velocity = 0;
     }
   }
 
@@ -232,13 +232,18 @@ void SetInstrument(int instrument) {
   selectedInstrument = instrument;
   UpdateLeds();
   UpdateLcd();
-  if (!inputMonitorButton.isPressed()) {
-    MIDI.sendNoteOn(instrumentNotes[instrument] + (octive * 8), instrumentVelocities[instrument], midiChanel);
+  if (!shiftButton.isPressed()) {
+    MIDI.sendNoteOn(instrumentNotes[instrument] + (octive * 8), 100, midiChanel);
     MIDI.sendNoteOff(instrumentNotes[instrument] + (octive * 8), 100, midiChanel);
   }
 }
 
 void SetHit(int x) {
-  sequence[selectedInstrument][x].on = !sequence[selectedInstrument][x].on;
+  if (!shiftButton.isPressed()) {
+    selectedNote = sequence[selectedInstrument][x];
+  } else {
+    sequence[selectedInstrument][x].on = !sequence[selectedInstrument][x].on;
+  }
   UpdateLeds();
+  UpdateLcd();
 }

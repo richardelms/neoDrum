@@ -16,7 +16,7 @@ void UpdateLcd() {
     lcd.setCursor(0, 0);
     lcd.print("VELOCITY");
     lcd.setCursor(0, 1);
-    lcd.print(instrumentVelocities[selectedInstrument]);
+    lcd.print(sequence[selectedNote.instrument][selectedNote.sequencePosition].velocity);
   }
   if (functionMode == 3) {
     lcd.setCursor(0, 0);

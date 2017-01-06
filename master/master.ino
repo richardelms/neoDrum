@@ -14,7 +14,7 @@
 Potentiometer brightnessPot = Potentiometer(15);
 Pushbutton startStopButton(22);
 Pushbutton functionButton(23);
-Pushbutton inputMonitorButton(29);
+Pushbutton shiftButton(29);
 int encoder0 = 24;
 int encoder1 = 25;
 Pushbutton resetPatternButton(26);
@@ -60,6 +60,8 @@ Pushbutton hitButtons[] = {
 
 
 
+
+
 //neoPixel definitions
 #define neoOutput 2
 Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(8, 8, neoOutput,
@@ -90,6 +92,10 @@ NeoColor selectedAndStepColor = NeoColor(255, 0, 0);
 
 NeoColor selectedInstrumentColor = NeoColor(0, 0, 255);
 
+NeoColor selectedNoteColor = NeoColor(255, 255, 0);
+
+
+
 const uint16_t colors[] = {
   matrix.Color(255, 0, 0), matrix.Color(255, 255, 0), matrix.Color(0, 255, 0), matrix.Color(0, 255, 255), matrix.Color(0, 0, 255), matrix.Color(255, 0, 255)
 };
@@ -98,6 +104,8 @@ const uint16_t colors[] = {
 MIDI_CREATE_DEFAULT_INSTANCE();
 int instrumentNotes[] = {43, 42, 41, 40, 39, 38, 37, 36};
 bool notesOn[] = {false, false, false, false, false, false, false, false};
+bool instrumentMuted[] = {false, false, false, false, false, false, false, false};
+bool instrumentSoloed[] = {false, false, false, false, false, false, false, false};
 int octive = 0;
 int instrumentVelocities[] = {100, 100, 100, 100, 100, 100, 100, 100};
 int midiChanel = 1;
@@ -109,6 +117,7 @@ class Note
     int instrument;
     int velocity = 100;
     int SwingAmount;
+    int noteID = 0;
     bool on;
     bool ShouldPlay(int);
 };
@@ -121,9 +130,6 @@ bool Note::ShouldPlay(int midiClockPosition) {
 }
 
 
-
-
-
 //config values
 int numSteps = 8;
 int totalMatrixSize = 64;
@@ -132,13 +138,15 @@ int numPatterns = 5;
 
 
 //util vars
+Note sequence[8][8];
 int bpm = 120;
 bool firstStep = true;
 int currentStep = 0;
 int selectedInstrument = 7;
+Note selectedNote = sequence[7][0];
 unsigned long lastStep = 0;
 
-Note sequence[8][8];
+
 
 bool started = false;
 int midiClockCount = 0;
@@ -162,13 +170,17 @@ void setup() {
 }
 
 void InitSequence() {
+  int idIndex = 0;
   for (int i = 0; i < 8; i ++) {
     for (int x = 0; x < numSteps; x ++) {
       sequence[i][x].sequencePosition = x;
       sequence[i][x].instrument = i;
+      sequence[i][x].noteID = idIndex;
+      idIndex ++;
     }
   }
 }
+
 
 void SetupLcd() {
   lcd.begin(16, 2);
