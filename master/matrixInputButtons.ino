@@ -13,6 +13,7 @@ void CheckForInputs() {
   if (resetPatternButton.getSingleDebouncedRelease()) {
     ResetPattern();
     InitSequence();
+    UpdateLcd();
   }
   //matrix input
   if (instrumentSelectButtons[0].getSingleDebouncedRelease()) {
