@@ -116,7 +116,7 @@ class Note
     int sequencePosition;
     int instrument;
     int velocity = 100;
-    int SwingAmount;
+    int SwingAmount = 0;
     int noteID = 0;
     bool on;
     bool ShouldPlay(int);
@@ -133,7 +133,7 @@ bool Note::ShouldPlay(int midiClockPosition) {
 //config values
 int numSteps = 8;
 int totalMatrixSize = 64;
-int numFunctions = 8;
+int numFunctions = 7;
 int numPatterns = 5;
 
 
@@ -143,7 +143,7 @@ int bpm = 120;
 bool firstStep = true;
 int currentStep = 0;
 int selectedInstrument = 7;
-Note selectedNote = sequence[7][0];
+Note selectedNote;
 unsigned long lastStep = 0;
 
 
@@ -154,7 +154,19 @@ bool firstMidiStep = true;
 bool master = false;
 int currentSavePattern = 0;
 int currentLoadPattern = 0;
-int functionMode = 0; //0 = bpm/ 1 = octive/2 = velocity  /3 = brightness /4 = master or slave/ 5 = save / 6 = load / 7 = pattern scale
+int functionMode = 0; 
+//0 = bpm 
+// 1 = velocity 
+//2 = swing  
+//3 = Octive 
+//4 = pattern scale 
+// 5 = master or slave
+// 6 = Brightness
+
+
+
+
+
 int matrixBrightness = 20;
 int patternScale = 24;
 
@@ -176,9 +188,12 @@ void InitSequence() {
       sequence[i][x].sequencePosition = x;
       sequence[i][x].instrument = i;
       sequence[i][x].noteID = idIndex;
+      sequence[i][x].velocity = 100;
+      sequence[i][x].SwingAmount = 0;
       idIndex ++;
     }
   }
+  selectedNote = sequence[7][0];
 }
 
 
@@ -211,5 +226,6 @@ void loop() {
   DebugMidi();
   //  CheckForStep();
   CheckForInputs();
+  CheckForEncoderInput();
 }
 
