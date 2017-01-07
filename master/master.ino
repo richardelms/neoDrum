@@ -110,44 +110,12 @@ int octive = 0;
 int instrumentVelocities[] = {100, 100, 100, 100, 100, 100, 100, 100};
 int midiChanel = 1;
 
-class Note
-{
-  public:
-    int sequencePosition;
-    int instrument;
-    int velocity = 100;
-    int SwingAmount = 0;
-    int noteID = 0;
-    bool on;
-    bool ShouldPlay(int);
-};
-bool Note::ShouldPlay(int midiClockPosition) {
-  if (on == true && midiClockPosition == ((sequencePosition * 24) + SwingAmount)) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
 
 //config values
 int numSteps = 8;
 int totalMatrixSize = 64;
 int numFunctions = 7;
 int numPatterns = 5;
-
-
-//util vars
-Note sequence[8][8];
-int bpm = 120;
-bool firstStep = true;
-int currentStep = 0;
-int selectedInstrument = 7;
-Note selectedNote;
-unsigned long lastStep = 0;
-
-
-
 bool started = false;
 int midiClockCount = 0;
 bool firstMidiStep = true;
@@ -169,6 +137,41 @@ int functionMode = 0;
 
 int matrixBrightness = 20;
 int patternScale = 24;
+class Note
+{
+  public:
+    int sequencePosition;
+    int instrument;
+    int velocity = 100;
+    int SwingAmount = 0;
+    int noteID = 0;
+    bool on;
+    bool ShouldPlay(int);
+};
+bool Note::ShouldPlay(int midiClockPosition) {
+  if (on == true && midiClockPosition == ((sequencePosition * patternScale) + SwingAmount)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
+
+
+
+//util vars
+Note sequence[8][8];
+int bpm = 120;
+bool firstStep = true;
+int currentStep = 0;
+int selectedInstrument = 7;
+Note selectedNote;
+unsigned long lastStep = 0;
+
+
+
+
 
 // initialisation
 void setup() {
