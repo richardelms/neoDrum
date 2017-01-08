@@ -64,9 +64,11 @@ Pushbutton hitButtons[] = {
 
 //neoPixel definitions
 #define neoOutput 2
-Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(8, 8, neoOutput,
+Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(8, 8, 2, 1, neoOutput,
                             NEO_MATRIX_TOP     + NEO_MATRIX_LEFT +
-                            NEO_MATRIX_ROWS + NEO_MATRIX_PROGRESSIVE,
+                            NEO_MATRIX_ROWS + NEO_MATRIX_PROGRESSIVE +
+                            NEO_TILE_TOP + NEO_TILE_LEFT +
+                            NEO_TILE_ROWS + NEO_TILE_PROGRESSIVE,
                             NEO_GRB            + NEO_KHZ800);
 class NeoColor
 {
@@ -107,13 +109,12 @@ bool notesOn[] = {false, false, false, false, false, false, false, false};
 bool instrumentMuted[] = {false, false, false, false, false, false, false, false};
 bool instrumentSoloed[] = {false, false, false, false, false, false, false, false};
 int octive = 0;
-int instrumentVelocities[] = {100, 100, 100, 100, 100, 100, 100, 100};
 int midiChanel = 1;
 
 
 //config values
-int numSteps = 8;
-int totalMatrixSize = 64;
+int numSteps = 16;
+int totalMatrixSize = 128;
 int numFunctions = 7;
 int numPatterns = 5;
 bool started = false;
@@ -122,12 +123,12 @@ bool firstMidiStep = true;
 bool master = false;
 int currentSavePattern = 0;
 int currentLoadPattern = 0;
-int functionMode = 0; 
-//0 = bpm 
-// 1 = velocity 
-//2 = swing  
-//3 = Octive 
-//4 = pattern scale 
+int functionMode = 0;
+//0 = bpm
+// 1 = velocity
+//2 = swing
+//3 = Octive
+//4 = pattern scale
 // 5 = master or slave
 // 6 = Brightness
 
@@ -135,7 +136,7 @@ int functionMode = 0;
 
 
 
-int matrixBrightness = 20;
+int matrixBrightness = 30;
 int patternScale = 24;
 class Note
 {
@@ -161,7 +162,7 @@ bool Note::ShouldPlay(int midiClockPosition) {
 
 
 //util vars
-Note sequence[8][8];
+Note sequence[8][16];
 int bpm = 120;
 bool firstStep = true;
 int currentStep = 0;
@@ -184,6 +185,7 @@ void setup() {
   SetupEncoder();
 }
 
+
 void InitSequence() {
   int idIndex = 0;
   for (int i = 0; i < 8; i ++) {
@@ -202,7 +204,7 @@ void InitSequence() {
 
 void SetupLcd() {
   lcd.begin(16, 2);
-  lcd.print("ginTronics 101");
+  lcd.print("INITALISING");
 }
 
 void SetupMidi() {
