@@ -40,8 +40,8 @@ void UpInput() {
       break;
     case 2:
       sequence[selectedNote.instrument][selectedNote.sequencePosition].SwingAmount ++;
-      if (sequence[selectedNote.instrument][selectedNote.sequencePosition].SwingAmount > 6) {
-        sequence[selectedNote.instrument][selectedNote.sequencePosition].SwingAmount = 6;
+      if (sequence[selectedNote.instrument][selectedNote.sequencePosition].SwingAmount > patternScale) {
+        sequence[selectedNote.instrument][selectedNote.sequencePosition].SwingAmount = patternScale;
       }
       break;
     case 3:
@@ -95,8 +95,8 @@ void DownInput() {
       break;
     case 2:
       sequence[selectedNote.instrument][selectedNote.sequencePosition].SwingAmount --;
-      if (sequence[selectedNote.instrument][selectedNote.sequencePosition].SwingAmount < -6) {
-        sequence[selectedNote.instrument][selectedNote.sequencePosition].SwingAmount = -6;
+      if (sequence[selectedNote.instrument][selectedNote.sequencePosition].SwingAmount < (0 - patternScale)) {
+        sequence[selectedNote.instrument][selectedNote.sequencePosition].SwingAmount = (0 - patternScale);
       }
       break;
     case 3:
