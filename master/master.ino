@@ -52,10 +52,21 @@ Pushbutton hitButton_4(39);
 Pushbutton hitButton_5(41);
 Pushbutton hitButton_6(43);
 Pushbutton hitButton_7(45);
+Pushbutton hitButton_8(46);
+Pushbutton hitButton_9(48);
+Pushbutton hitButton_10(50);
+Pushbutton hitButton_11(52);
+Pushbutton hitButton_12(47);
+Pushbutton hitButton_13(49);
+Pushbutton hitButton_14(51);
+Pushbutton hitButton_15(53);
+
 Pushbutton hitButtons[] = {
   hitButton_0, hitButton_1, hitButton_2,
   hitButton_3, hitButton_4, hitButton_5,
-  hitButton_6, hitButton_7
+  hitButton_6, hitButton_7, hitButton_8, hitButton_9, hitButton_10,
+  hitButton_11, hitButton_12, hitButton_13,
+  hitButton_14, hitButton_15
 };
 
 
@@ -123,6 +134,8 @@ bool firstMidiStep = true;
 bool master = false;
 int currentSavePattern = 0;
 int currentLoadPattern = 0;
+int matrixBrightness = 30;
+int patternScale = 24;
 int functionMode = 0;
 //0 = bpm
 // 1 = velocity
@@ -135,9 +148,6 @@ int functionMode = 0;
 
 
 
-
-int matrixBrightness = 30;
-int patternScale = 24;
 class Note
 {
   public:

@@ -1,20 +1,19 @@
-void CheckForStep() {
-//  if (!started || !master) {
-//    return;
-//  }
-//  unsigned long currentMillis = millis();
-//  if (!firstStep) {
-//    if (currentMillis - lastStep >= 60000 / (bpm * 2)) {
-//      lastStep = currentMillis;
-//      currentStep ++;
-//      if (currentStep == numSteps) {
-//        currentStep = 0;
-//      }
-//      MakeStep();
-//    }
-//  } else {
-//    lastStep = currentMillis;
-//    firstStep = false;
-//    MakeStep();
-//  }
+
+using namespace midi;
+
+void CheckForPulse() {
+  if (!started || !master) {
+    return;
+  }
+  unsigned long currentMillis = millis();
+    if (currentMillis - lastStep >= 60000 / ((bpm * 2) / patternScale)) {
+      lastStep = currentMillis;
+      SendClockTick();
+  } 
 }
+
+void SendClockTick(){
+  HandleClockTick();
+  //SEND CLOCK TICK TO MIDI OUT
+  MIDI.sendRealTime(Clock);
+  }

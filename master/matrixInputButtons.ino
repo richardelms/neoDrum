@@ -64,6 +64,30 @@ void CheckForInputs() {
   if (hitButtons[7].getSingleDebouncedRelease()) {
     SetHit(7);
   }
+  if (hitButtons[8].getSingleDebouncedRelease()) {
+    SetHit(8);
+  }
+  if (hitButtons[9].getSingleDebouncedRelease()) {
+    SetHit(9);
+  }
+  if (hitButtons[10].getSingleDebouncedRelease()) {
+    SetHit(10);
+  }
+  if (hitButtons[11].getSingleDebouncedRelease()) {
+    SetHit(11);
+  }
+  if (hitButtons[12].getSingleDebouncedRelease()) {
+    SetHit(12);
+  }
+  if (hitButtons[13].getSingleDebouncedRelease()) {
+    SetHit(13);
+  }
+  if (hitButtons[14].getSingleDebouncedRelease()) {
+    SetHit(14);
+  }
+  if (hitButtons[15].getSingleDebouncedRelease()) {
+    SetHit(15);
+  }
 }
 
 //void CheckForSaveAndLoadInput() {
