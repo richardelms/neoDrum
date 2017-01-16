@@ -103,7 +103,7 @@ void CheckForInputs() {
 
 void ResetPattern() {
   for (int i = 0; i < 8; i++) {
-    for (int x = 0; x < 8; x ++) {
+    for (int x = 0; x < numSteps; x ++) {
       sequence[i][x].on = false;
     }
   }
@@ -123,6 +123,7 @@ void SetInstrument(int instrument) {
 void SetHit(int x) {
   if (!shiftButton.isPressed()) {
     selectedNote = sequence[selectedInstrument][x];
+    sequence[selectedInstrument][x].hidden = false;
   } else {
     sequence[selectedInstrument][x].on = !sequence[selectedInstrument][x].on;
   }

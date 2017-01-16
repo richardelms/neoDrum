@@ -54,7 +54,7 @@ void SetLedColor(int i, int x, int masterIndex) {
       }
     }
   }
-  if (sequence[i][x].noteID == selectedNote.noteID) {
+  if (sequence[i][x].noteID == selectedNote.noteID && !sequence[i][x].hidden) {
     matrix.setPixelColor(masterIndex, selectedNoteColor.r, selectedNoteColor.g, selectedNoteColor.b);
   }
 
