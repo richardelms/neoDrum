@@ -11,13 +11,8 @@
 
 //input definitions
 //controlls
-Potentiometer CCPot0 = Potentiometer(0);
-Potentiometer CCPot1 = Potentiometer(1);
-Potentiometer CCPot2 = Potentiometer(2);
-Potentiometer CCPot3 = Potentiometer(3);
-int lastCCPotValues[] = {0, 0, 0, 0};
-int CCPotMidiNotes[] = {52, 53, 54, 55};
-Potentiometer CCPots[] = {CCPot0, CCPot1, CCPot2, CCPot3};
+//*************************************************************************
+
 
 Pushbutton startStopButton(22);
 Pushbutton functionButton(23);
@@ -201,18 +196,9 @@ void setup() {
   InitMatrix();
   SetupMidi();
   SetupEncoder();
-  SetupCCPots();
 }
 
-void SetupCCPots() {
-  CCPot0.setSectors(127);
-  CCPot1.setSectors(127);
-  CCPot2.setSectors(127);
-  CCPot3.setSectors(127);
-  for(int i = 0; i < 4; i ++){
-    lastCCPotValues[i] = CCPots[i].getSector();
-    }
-}
+
 
 
 void InitSequence() {
