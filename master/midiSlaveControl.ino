@@ -4,12 +4,6 @@ void DebugMidi() {
   }
   if (MIDI.read())
   {
-    //    for debug
-    //    lcd.clear();
-    //    lcd.setCursor(0, 0);
-    //    lcd.print(MIDI.getType());
-    //    lcd.setCursor(0, 1);
-    //    lcd.print(MIDI.getData1());
     switch (MIDI.getType()) {
       case 248:
         HandleClockTick();
@@ -22,9 +16,7 @@ void DebugMidi() {
 }
 
 void HandleClockTick() {
-  //  if (midiClockCount % 4 == 0) {
   CheckForNotes();
-  //  }
   if (midiClockCount % patternScale == 0) {
     if (!firstMidiStep) {
       currentStep ++;
@@ -33,15 +25,13 @@ void HandleClockTick() {
       }
     }
     firstMidiStep = false;
-    MakeStep();
+    UpdateLeds();
   }
   midiClockCount ++;
   if (midiClockCount == (patternScale * numSteps)) {
     midiClockCount = 0;
   }
 }
-
-
 
 void CheckForNotes() {
   for (int i = 0; i < 8; i ++) {

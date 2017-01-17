@@ -1,15 +1,12 @@
-
 class Pot
 {
   public:
     Pot(byte pin, byte command, byte control, byte channel);
-    void muxUpdate();
     void newValue(byte command, byte value, byte channel);
     byte getValue();
     byte Pcommand;
     byte Pcontrol;
     byte Pchannel;
-
   private:
     byte _pin;
     byte _muxpin;
@@ -20,7 +17,6 @@ class Pot
     bool _changed;
     byte _enablepin;
 };
-
 
 Pot::Pot(byte pin, byte command, byte control, byte channel)
 {
@@ -34,17 +30,6 @@ Pot::Pot(byte pin, byte command, byte control, byte channel)
   Pcontrol = control;
   Pchannel = channel;
 }
-
-void Pot::muxUpdate()
-{
-  byte temp = _muxpin;
-  temp = temp << 2;
-  if (_numMuxPins > 8) PORTD = PORTD & B11000011;
-  else PORTD = PORTD & B11100011;
-  //PORTD = PORTD & B11000011;
-  PORTD = PORTD | temp;
-}
-
 
 byte Pot::getValue()
 {
@@ -63,7 +48,6 @@ void Pot::newValue(byte command, byte value, byte channel) {
   Pcontrol = value;
   Pchannel = channel;
 }
-//*************************************************************************
 
 Pot PO0(0, 0, 52, 1);
 Pot PO1(1, 0, 53, 1);

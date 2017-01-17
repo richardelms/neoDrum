@@ -7,7 +7,6 @@
 #include <Pushbutton.h>
 #include <Adafruit_NeoPixel.h>
 #include <LiquidCrystal.h>
-#include <EEPROM.h>
 
 //input definitions
 //controlls
@@ -72,10 +71,6 @@ Pushbutton hitButtons[] = {
   hitButton_11, hitButton_12, hitButton_13,
   hitButton_14, hitButton_15
 };
-
-
-
-
 
 //neoPixel definitions
 #define neoOutput 2
@@ -263,7 +258,7 @@ void InitMatrix() {
 // program loop
 void loop() {
   DebugMidi();
-  //  CheckForStep();
+  CheckForPulse();
   CheckForInputs();
   CheckForEncoderInput();
   CheckForCCPotInput();

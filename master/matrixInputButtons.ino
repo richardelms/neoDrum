@@ -7,6 +7,9 @@ void CheckForInputs() {
   }
   //controlls
   if (startStopButton.getSingleDebouncedRelease()) {
+    if (!master) {
+      return;
+    }
     started = !started;
     MIDI.sendControlChange(22, 127, midiChanel);
   }

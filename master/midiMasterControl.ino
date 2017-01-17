@@ -1,5 +1,4 @@
-
-using namespace midi;
+//using namespace midi;
 
 void CheckForPulse() {
   if (!started || !master) {
@@ -15,5 +14,5 @@ void CheckForPulse() {
 void SendClockTick(){
   HandleClockTick();
   //SEND CLOCK TICK TO MIDI OUT
-  MIDI.sendRealTime(Clock);
+//  MIDI.sendRealTime(Clock);
   }
