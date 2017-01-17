@@ -111,13 +111,22 @@ void ResetPattern() {
 }
 
 void SetInstrument(int instrument) {
-  selectedInstrument = instrument;
+
+
+  if (!soloButton.isPressed()) {
+    instrumentSoloed[instrument] = !instrumentSoloed[instrument];
+  }
+  else if (!muteButton.isPressed()) {
+    instrumentMuted[instrument] = !instrumentMuted[instrument];
+  } else {
+    selectedInstrument = instrument;
+    if (!shiftButton.isPressed()) {
+      MIDI.sendNoteOn(instrumentNotes[instrument] + (octive * 8), 100, midiChanel);
+      MIDI.sendNoteOff(instrumentNotes[instrument] + (octive * 8), 100, midiChanel);
+    }
+  }
   UpdateLeds();
   UpdateLcd();
-  if (!shiftButton.isPressed()) {
-    MIDI.sendNoteOn(instrumentNotes[instrument] + (octive * 8), 100, midiChanel);
-    MIDI.sendNoteOff(instrumentNotes[instrument] + (octive * 8), 100, midiChanel);
-  }
 }
 
 void SetHit(int x) {

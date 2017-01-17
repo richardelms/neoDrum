@@ -17,6 +17,8 @@
 Pushbutton startStopButton(22);
 Pushbutton functionButton(23);
 Pushbutton shiftButton(29);
+Pushbutton soloButton(9);
+Pushbutton muteButton(10);
 int encoder0 = 24;
 int encoder1 = 25;
 Pushbutton resetPatternButton(26);
@@ -109,7 +111,9 @@ NeoColor selectedInstrumentColor = NeoColor(0, 0, 255);
 
 NeoColor selectedNoteColor = NeoColor(255, 255, 0);
 
+NeoColor soloColor = NeoColor(100, 100, 0);
 
+NeoColor muteColor = NeoColor(50, 50, 100);
 
 const uint16_t colors[] = {
   matrix.Color(255, 0, 0), matrix.Color(255, 255, 0), matrix.Color(0, 255, 0), matrix.Color(0, 255, 255), matrix.Color(0, 0, 255), matrix.Color(255, 0, 255)
@@ -147,8 +151,14 @@ int functionMode = 0;
 // 5 = master or slave
 // 6 = Brightness
 
-
-
+bool SoloActive() {
+  for (int i = 0 ; i < 8; i++) {
+    if (instrumentSoloed[i]) {
+      return true;
+    }
+  }
+  return false;
+}
 
 class Note
 {
@@ -163,13 +173,22 @@ class Note
     bool hidden = true;
 };
 bool Note::ShouldPlay(int midiClockPosition) {
-  if (on == true && midiClockPosition == ((sequencePosition * patternScale) + SwingAmount)) {
+  if (SoloActive() && !instrumentSoloed[instrument]) {
+    return false;
+  }
+  if (instrumentMuted[instrument]) {
+    return false;
+  }
+  int finalPosition = ((sequencePosition * patternScale) + SwingAmount);
+  if (finalPosition < 0) {
+    finalPosition = (patternScale + SwingAmount);
+  }
+  if (on == true && midiClockPosition == finalPosition) {
     return true;
   } else {
     return false;
   }
 }
-
 
 
 

@@ -52,6 +52,12 @@ void SetLedColor(int i, int x, int masterIndex) {
       } else {
         matrix.setPixelColor(masterIndex, baseUnselectedValue.r, baseUnselectedValue.g, baseUnselectedValue.b);
       }
+      if (instrumentSoloed[i]) {
+        matrix.setPixelColor(masterIndex, soloColor.r, soloColor.g, soloColor.b);
+      }
+      if (instrumentMuted[i]) {
+        matrix.setPixelColor(masterIndex, muteColor.r, muteColor.g, muteColor.b);
+      }
     }
   }
   if (sequence[i][x].noteID == selectedNote.noteID && !sequence[i][x].hidden) {

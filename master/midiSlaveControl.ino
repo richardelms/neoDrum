@@ -21,11 +21,6 @@ void DebugMidi() {
   }
 }
 
-
-
-
-
-
 void HandleClockTick() {
   //  if (midiClockCount % 4 == 0) {
   CheckForNotes();
