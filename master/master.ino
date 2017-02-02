@@ -1,3 +1,4 @@
+#include <MemoryFree.h>
 #include <Potentiometer.h>
 #include <MIDI.h>
 #include <Adafruit_NeoMatrix.h>
@@ -126,7 +127,7 @@ int midiChanel = 1;
 //config values
 int numSteps = 16;
 int totalMatrixSize = 128;
-int numFunctions = 7;
+int numFunctions = 8;
 int numPatterns = 5;
 bool started = false;
 int midiClockCount = 0;

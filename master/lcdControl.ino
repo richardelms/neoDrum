@@ -1,5 +1,15 @@
 void UpdateLcd() {
   lcd.clear();
+
+  if (freeMemory() < 500) {
+    lcd.setCursor(0, 0);
+    lcd.print("MEMORY WARNING");
+    lcd.setCursor(0, 1);
+    lcd.print(freeMemory());
+    return;
+  }
+
+
   switch (functionMode) {
     case 0:
       lcd.setCursor(0, 0);
@@ -31,22 +41,22 @@ void UpdateLcd() {
       lcd.setCursor(0, 1);
       switch (patternScale) {
         case 6:
-        lcd.print("4/32");
+          lcd.print("4/32");
           break;
         case 12:
-        lcd.print("4/16");
+          lcd.print("4/16");
           break;
         case 24:
-        lcd.print("4/8");
+          lcd.print("4/8");
           break;
         case 48:
-        lcd.print("4/4");
+          lcd.print("4/4");
           break;
         case 96:
-        lcd.print("4/2");
+          lcd.print("4/2");
           break;
         case 192:
-        lcd.print("4/1");
+          lcd.print("4/1");
           break;
       }
       break;
@@ -65,6 +75,12 @@ void UpdateLcd() {
       lcd.print("Brightness");
       lcd.setCursor(0, 1);
       lcd.print(matrixBrightness);
+      break;
+    case 7:
+      lcd.setCursor(0, 0);
+      lcd.print("Free Memory");
+      lcd.setCursor(0, 1);
+      lcd.print(freeMemory());
       break;
   }
 }
