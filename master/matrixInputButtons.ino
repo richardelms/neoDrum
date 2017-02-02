@@ -10,8 +10,10 @@ void CheckForInputs() {
     if (!master) {
       return;
     }
+    if(started){
+        HandleStop();
+      }
     started = !started;
-    MIDI.sendControlChange(22, 127, midiChanel);
   }
   if (resetPatternButton.getSingleDebouncedRelease()) {
     ResetPattern();

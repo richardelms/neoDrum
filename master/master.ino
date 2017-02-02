@@ -14,14 +14,13 @@
 
 
 Pushbutton startStopButton(22);
-Pushbutton functionButton(23);
+Pushbutton functionButton(27);
 Pushbutton shiftButton(29);
 Pushbutton soloButton(9);
 Pushbutton muteButton(10);
 int encoder0 = 24;
 int encoder1 = 25;
 Pushbutton resetPatternButton(26);
-Pushbutton encoderButton(27);
 int lastEncoderPosition = 0;
 int encoder0Pos = 0;
 int encoder0PinALast = LOW;

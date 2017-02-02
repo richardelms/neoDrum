@@ -18,7 +18,7 @@ void CheckForEncoderInput() {
 
 void UpInput() {
 
-  if (!functionButton.isPressed())
+  if (functionButton.isPressed())
   {
     functionMode ++;
     if (functionMode == numFunctions) {
@@ -31,6 +31,9 @@ void UpInput() {
   switch (functionMode) {
     case 0:
       bpm ++;
+      if (bpm > 1200) {
+        bpm = 1200;
+      }
       break;
     case 1:
       sequence[selectedNote.instrument][selectedNote.sequencePosition].velocity ++;
@@ -73,7 +76,7 @@ void UpInput() {
 
 void DownInput() {
 
-  if (!functionButton.isPressed())
+  if (functionButton.isPressed())
   {
     functionMode --;
     if (functionMode < 0) {
@@ -85,7 +88,10 @@ void DownInput() {
 
   switch (functionMode) {
     case 0:
-      bpm ++;
+      bpm --;
+      if (bpm < 0) {
+        bpm = 0;
+      }
       break;
     case 1:
       sequence[selectedNote.instrument][selectedNote.sequencePosition].velocity --;
